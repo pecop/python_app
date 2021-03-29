@@ -1,5 +1,7 @@
+# %%
 import os
 import sys
+import signal
 from selenium.webdriver import Chrome, ChromeOptions
 import requests
 from bs4 import BeautifulSoup
@@ -13,8 +15,8 @@ from concurrent import futures
 
 logger = getLogger(__name__)
 fomatterSetting = Formatter('[%(asctime)s] %(name)s %(threadName)s %(levelname)s: %(message)s', '%Y-%m-%d %H:%M:%S')
-handler = FileHandler('logger.log')
-# handler = StreamHandler()
+# handler = FileHandler('logger.log')
+handler = StreamHandler()
 # handler = NullHandler()
 handler.setLevel(DEBUG)
 logger.setLevel(DEBUG)
@@ -22,166 +24,112 @@ handler.setFormatter(fomatterSetting)
 logger.addHandler(handler)
 logger.propagate = False
 
-class Job:
-    
-    def __init__(self, search_basic_url, page):
-        self.search_basic_url = search_basic_url
-        self.page = page
-        firstHalf_url, secondHalf_url = search_basic_url.split('?')
-        self.search_url = firstHalf_url + "pg" + str(page) + "/?" + secondHalf_url
+class Search():
+
+    def __init__(self, url):
+        self.url = url
+        self.search_url = ''
+        self.keyword = ''
+        self.isSale = False
+        self.cost_range = {'lower': '0', 'upper': '-'}
+        self.option = ''
         self.soup = ''
-        self.job_info = {'name' : [],
-                         'apeal': [],
-                         'copy' : [],
-                         'employment_status': [],
-                         'income': [],
-                        }
-        
+    
+    def make_url(self):
+
+        self.set_option()
+        self.search_url = self.url + self.keyword + self.option
+    
+    def set_keyword(self, keyword):
+
+        self.keyword = keyword + '/'
+    
+    def set_isSale(self, isSale):
+
+        self.isSale = isSale
+    
+    def set_cost_range(self, lower='0', upper='-'):
+
+        self.cost_range['upper'] = str(upper)
+        self.cost_range['lower'] = str(lower)
+
+    def set_option(self):
+
+        if self.cost_range['upper'] != '-':
+            self.option = '?' + 'pc=' + self.cost_range['lower'] + '-' + self.cost_range['upper']
+        else:
+            self.option = '?' + 'pc=' + self.cost_range['lower']
+
+        if self.isSale:
+            self.option += '&' + 'rp=' + '1'
+        else:
+            self.option += '&' + 'rp=' + '0'
+    
     def parse_html(self):
 
-        logger.debug(str(self.page) + "ページ目パース開始")
         html = requests.get(self.search_url)
         html.encoding = html.apparent_encoding
         self.soup = BeautifulSoup(html.content, "html.parser")
 
-    def getJobInfo(self):
+def parse_html(url):
 
-        logger.debug(str(self.page) + "ページ目情報取得開始")
-        names = self.soup.select('section[class^="cassetteRecruit"]>h3[class$="__name"]')
-        copies = self.soup.select('section[class^="cassetteRecruit"]>p[class$="__copy"]')
-        infoTables = self.soup.select('div[class^="cassetteRecruit"]>div[class$="__detail"]>div[class*="__main"]')
+    html = requests.get(url)
+    html.encoding = html.apparent_encoding
+    soup = BeautifulSoup(html.content, "html.parser")
 
-        for name, copy, infoTable in zip(names, copies, infoTables):
+    return soup
 
-            self.job_info['name'].append(name.text.split('|')[0].replace(' ', '').replace('　', ''))
-
-            try:
-                self.job_info['apeal'].append(name.text.split('|')[1].replace(' ', '').replace('　', ''))
-            except IndexError as e:
-                logger.error("情報がありません")
-                self.job_info['apeal'].append('')
-
-            self.job_info['copy'].append(copy.text.split('\n')[1].replace(' ', '').replace('　', ''))
-            self.job_info['employment_status'].append(copy.text.split('\n')[2].replace(' ', '').replace('　', ''))
-
-            for content, incom in zip(infoTable.select('.tableCondition__head'), infoTable.select('.tableCondition__body')):
-
-                IsIncom = False
-                if '初年度年収' in content.text:
-                    self.job_info['income'].append(incom.text)
-                    IsIncom = True
-
-            if IsIncom == False:
-                self.job_info['income'].append('')
-
-        logger.debug(str(self.page) + "ページ目完了")
-
-
-def run_getJobInfo(job):
-
-    job.parse_html()
-    job.getJobInfo()
-
-
-def set_driver(driver_path, headless_flg):
+def set_driver(IsHeadless):
 
     options = ChromeOptions()
 
-    if headless_flg == True:
-        options.add_argument('--headless')
-
-    options.add_argument(
-        '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36')
-    # options.add_argument('log-level=3')
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--ignore-ssl-errors')
-    options.add_argument('--incognito')          # シークレットモードの設定を付与
-
-    # ChromeのWebDriverオブジェクトを作成する。
-    return Chrome(executable_path=os.getcwd() + "/" + driver_path, options=options)
-
-
-def main():
-
-    search_keyword = input('検索キーワードを入力してください：')
-    logger.debug(search_keyword)
-    search_url = "https://tenshoku.mynavi.jp/"
-    
-    # driverを起動
-    IsHeadless = True
-
     try:
         if os.name == 'nt': #Windows
-            driver = set_driver("chromedriver.exe", IsHeadless)
+            driver_path = 'chromedriver.exe'
         elif os.name == 'posix': #Mac
-            driver = set_driver("chromedriver", IsHeadless)
+            driver_path = 'chromedriver'
     except Exception as err:
         logger.error(err)
         sys.exit()
-    
+
+    if IsHeadless == True:
+        options.add_argument('--headless')
+
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--ignore-ssl-errors')
+    options.add_argument('--incognito')
+
+    driver = Chrome(executable_path=os.getcwd() + "/" + driver_path, options=options)
     driver.set_window_size('1200', '1000')
-    driver.get(search_url)
-    time.sleep(5)
- 
-    try:
-        # ポップアップを閉じる
-        driver.execute_script('document.querySelector(".karte-close").click()')
-        time.sleep(5)
-        # ポップアップを閉じる
-        driver.execute_script('document.querySelector(".karte-close").click()')
-    except:
-        pass
+
+    return driver
+
+def keep_open_driver(driver):
+
+    os.kill(driver.service.process.pid, signal.SIGTERM)
+
+def main():
+
+    url = 'https://www.buyma.com/r/'
+
+    search = Search(url)
+    search.set_keyword('who.me.see')
+    search.set_isSale(isSale=True)
+    search.set_cost_range(upper=100)
+    search.make_url()
+    search_url = search.search_url
+    logger.debug(search_url)
   
-    # 検索窓に入力
-    driver.find_element_by_class_name("topSearch__text").send_keys(search_keyword)
-    # 検索ボタンクリック
-    driver.find_element_by_class_name("topSearch__button").click()
+    IsHeadless = False
+    driver = set_driver(IsHeadless)
 
-    cur_url = driver.current_url
-    logger.info(cur_url)
-
-    jobs = []
-
-    # no use multi-thread
-    # for i in range(10):
-
-    #     jobs.append(Job(cur_url, i+1))
-    #     run_getJobInfo(jobs[i])
-
-    # Multi-thread by threading
-    # threads = []
-    # for i in range(10):
-
-    #     jobs.append(Job(cur_url, i+1))
-
-    #     t = threading.Thread(name='thread'+str(i+1), target=run_getJobInfo, args=(jobs[i], ))
-    #     t.start()
-    #     threads.append(t)
-    #     time.sleep(1)
-  
-    # for thread in threads:
-    #     thread.join()
-
-    # Multi-thread by concurrent.futures
-    with futures.ThreadPoolExecutor(max_workers=10, thread_name_prefix="thread") as executor:
-        for i in range(10):
-            jobs.append(Job(cur_url, i+1))
-            executor.submit(run_getJobInfo, jobs[i])
-            time.sleep(1)
-
-    job_info_all = defaultdict(list)
-    info_list = jobs[0].job_info.keys()
-
-    for job in jobs:
-        for item in info_list:
-            job_info_all[item] += job.job_info[item]
-
-    df = pd.DataFrame(job_info_all)
+    driver.get(url)
+    time.sleep(1)
+    search.parse_html()
     
-    df.to_csv("mynavi_high_incom_list_" + search_keyword + ".csv", encoding='utf-8-sig')
-
-    logger.debug("CSV出力完了")
-
-
+    keep_open_driver(driver)
+ 
 if __name__ == "__main__":
     main()
+
+# %%
