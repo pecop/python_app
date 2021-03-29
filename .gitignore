@@ -3,5 +3,6 @@ old/
 *.log
 *.spec
 build/
+__pycache__/
 chromedriver.exe
 post_app
