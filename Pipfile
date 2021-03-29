@@ -7,6 +7,8 @@ name = "pypi"
 selenium = "*"
 beautifulsoup4 = "*"
 pandas = "*"
+requests = "*"
+eel = "*"
 
 [dev-packages]
 jupyter = "*"
