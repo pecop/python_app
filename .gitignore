@@ -1,1 +1,6 @@
-old
+old/
+*.csv
+*.log
+*.spec
+build/
+chromedriver.exe
