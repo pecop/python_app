@@ -32,7 +32,7 @@ def error_logger(message, error):
 
     logger.error(message)
     logger.error(error)
-    eel.message(message, True)
+    eel.message(message, True, False)
 
 @eel.expose
 def search(searchInfo):
@@ -42,9 +42,9 @@ def search(searchInfo):
     try:
         if driver is None:
             driver = set_driver(IsHeadless)
-            eel.message('Selenium driver setting success')
+            eel.message('検索中・・・', False, True)
     except Exception as error:
-        error_logger('Selenium driver error', error)
+        error_logger('Seleniumドライバ設定エラー', error)
         return None
 
     try:
@@ -53,11 +53,11 @@ def search(searchInfo):
         search_url = search_goods.search_url
         logger.debug(search_url)
         driver.get(search_url)
-        eel.message('Search success')
+        eel.message('検索完了')
         eel.fetch_enable()
 
     except Exception as error:
-        error_logger('Search error', error)
+        error_logger('検索エラー', error)
 
 
 @eel.expose
@@ -75,12 +75,12 @@ def fetch(fetchNumber):
         item.analyze_soup(soup)
         logger.debug(item.url)
         item.fetch_info(fetchNumber)
-        eel.message('Fetch sucess')
+        eel.message('情報取得完了')
         eel.viewInfo(item.item_info)
         eel.save_enable()
 
     except Exception as error:
-        error_logger('Fetch error', error) 
+        error_logger('情報取得エラー', error) 
 
 @eel.expose
 def save(fileName):
@@ -89,10 +89,10 @@ def save(fileName):
         df = pd.DataFrame(item.item_info)
         df.to_csv(dt.now().strftime("%Y%m%d_%H%M") + '_' + fileName + '_' + '.csv', encoding='utf-8-sig')
         logger.debug("CSV出力完了")
-        eel.message('Save sucess')
+        eel.message('CSV保存完了')
 
     except Exception as error:
-        error_logger('Save error', error) 
+        error_logger('CSV保存エラー', error) 
 
 def main():
     settings.start(app_name,end_point,size)

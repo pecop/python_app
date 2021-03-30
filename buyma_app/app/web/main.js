@@ -1,50 +1,33 @@
 "use strict"
 
 let items = []
-const fetch_tbody = document.getElementById('fetch-tbody')
+const fetch_tbody = $('#fetch-tbody')
+
 
 class Item {
     constructor(id, name, price, access, like, category1, category2, category3) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.access = access;
-        this.like = like;
-        this.category1 = category1;
-        this.category2 = category2;
-        this.category3 = category3;
+        this.id = id
+        this.name = name
+        this.price = price
+        this.access = access
+        this.like = like
+        this.category1 = category1
+        this.category2 = category2
+        this.category3 = category3
     }
 
     view() {
 
-        const tr = document.createElement('tr');
-        const td_id = document.createElement('td');
-        const td_name = document.createElement('td');
-        const td_price = document.createElement('td');
-        const td_access = document.createElement('td');
-        const td_like = document.createElement('td');
-        const td_category1 = document.createElement('td');
-        const td_category2 = document.createElement('td');
-        const td_category3 = document.createElement('td');
+        const tr = $('<tr>')
+        const td_id = $('<td>').text(this.id)
+        const td_name = $('<td>').text(this.name).addClass('abridgement')
+        const td_price = $('<td>').text(this.price)
+        const td_access = $('<td>').text(this.access)
+        const td_like = $('<td>').text(this.like)
 
-        td_id.textContent = this.id;
-        td_name.textContent = this.name;
-        td_price.textContent = this.price;
-        td_access.textContent = this.access;
-        td_like.textContent = this.like;
-        td_category1.textContent = this.category1;
-        td_category2.textContent = this.category2;
-        td_category3.textContent = this.category3;
+        tr.append(td_id).append(td_name).append(td_price).append(td_access).append(td_like)
+        fetch_tbody.append(tr)
 
-        tr.appendChild(td_id);
-        tr.appendChild(td_name);
-        tr.appendChild(td_price);
-        tr.appendChild(td_access);
-        tr.appendChild(td_like);
-        tr.appendChild(td_category1);
-        tr.appendChild(td_category2);
-        tr.appendChild(td_category3);
-        fetch_tbody.appendChild(tr);
     }
 }
 
@@ -61,7 +44,7 @@ $('#search').click(() => {
         priceLower: priceLower,
         priceUpper: priceUpper,
     }
-
+    alert('Seleniumドライバ設定中・・・', 'warning')
     eel.search(searchInfo)
 
 })
@@ -69,6 +52,7 @@ $('#search').click(() => {
 $('#fetch').click(() => {
 
     const fetchNumber = Number($('#fetch-number').val())
+    alert('情報取得中・・・', 'warning')
     eel.fetch(fetchNumber)
 
 })
@@ -79,6 +63,15 @@ $('#save').click(() => {
     eel.save(fileName)
 
 })
+
+const alert = (message, message_color) => {
+
+    const alert = $('<div>').text(message).addClass(`alert alert-${message_color} vanish`).attr('role', 'alert').hide()
+    $('#message').empty()
+    $('#message').append(alert)
+    alert.fadeIn(500)
+}
+
 
 eel.expose(fetch_enable)
 function fetch_enable() {
@@ -91,38 +84,25 @@ function save_enable() {
 }
 
 eel.expose(message)
-function message(message, isError=false) {
+function message(message, isError=false, isWarning=false) {
 
     let message_color
 
     if (isError) {
         message_color = 'danger'
         console.error(message)
+    } else if (isWarning) {
+        message_color = 'warning'
+        console.log(message)
     } else {
         message_color = 'success'
         console.log(message)
     }
 
-    const alert = $('<div>').text(message).addClass(`alert alert-${message_color} vanish`).attr('role', 'alert').hide()
-    $('#message').empty()
-    $('#message').append(alert)
-    alert.fadeIn(500)
+    alert(message, message_color)
 
 }
 
-
-const clearTableView = () => {
-
-    const trNodes = document.querySelectorAll('#fetch-tbody>tr')
-    console.log(trNodes.length)
-
-    if (trNodes) {
-        trNodes.forEach(trNode => {
-            console.log(trNode)
-            fetch_tbody.removeChild(trNode)
-        })
-    }
-}
 
 eel.expose(viewInfo)
 function viewInfo(item_info) {
@@ -133,7 +113,7 @@ function viewInfo(item_info) {
     const formatter = new Intl.NumberFormat('ja', {
         style: 'currency',
         currency: 'JPY'  
-      })
+    })
 
     for (let i = 0; i < fetchNumber; i++) {
         const name = item_info.name[i]
@@ -146,16 +126,16 @@ function viewInfo(item_info) {
         items.push(new Item(i+1, name, price, access, like, category1, category2, category3))
     }
 
-    clearTableView()
+    fetch_tbody.empty()
 
     items.forEach(item => {
-        item.view();
+        item.view()
     })
 
 }
 
 
 $('body').on('click', '.vanish', function() {
-    $(this).remove();
-});
+    $(this).remove()
+})
 
