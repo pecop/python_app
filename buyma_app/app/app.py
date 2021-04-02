@@ -11,8 +11,8 @@ from scraping import parse_html
 
 logger = getLogger(__name__)
 fomatterSetting = Formatter('[%(asctime)s] %(name)s %(threadName)s %(levelname)s: %(message)s', '%Y-%m-%d %H:%M:%S')
-# handler = FileHandler('logger.log')
-handler = StreamHandler()
+handler = FileHandler('logger.log')
+# handler = StreamHandler()
 # handler = NullHandler()
 handler.setLevel(DEBUG)
 logger.setLevel(DEBUG)

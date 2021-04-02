@@ -3,7 +3,7 @@
 let items = []
 const fetch_tbody = $('#fetch-tbody')
 
-
+// 抽出データクラス
 class Item {
     constructor(id, name, price, access, like, category1, category2, category3) {
         this.id = id
@@ -31,6 +31,7 @@ class Item {
     }
 }
 
+// Seleniumドライバ設定及び検索
 $('#search').click(() => {
 
     const keyword = $('#keyword').val()
@@ -49,6 +50,7 @@ $('#search').click(() => {
 
 })
 
+// 情報抽出
 $('#fetch').click(() => {
 
     const fetchNumber = Number($('#fetch-number').val())
@@ -57,6 +59,7 @@ $('#fetch').click(() => {
 
 })
 
+// CSV保存
 $('#save').click(() => {
 
     const fileName = $('#file-name').val()
@@ -73,16 +76,19 @@ const alert = (message, message_color) => {
 }
 
 
+// 抽出ボタンENA
 eel.expose(fetch_enable)
 function fetch_enable() {
     $('#fetch').prop('disabled', false)
 }
 
+// 保存ボタンENA
 eel.expose(save_enable)
 function save_enable() {
     $('#save').prop('disabled', false)
 }
 
+// メッセージ、アラーム表示
 eel.expose(message)
 function message(message, isError=false, isWarning=false) {
 
@@ -103,7 +109,7 @@ function message(message, isError=false, isWarning=false) {
 
 }
 
-
+// 抽出データのクラス化、テーブル表示
 eel.expose(viewInfo)
 function viewInfo(item_info) {
 
@@ -135,7 +141,17 @@ function viewInfo(item_info) {
 }
 
 
+// メッセージ、アラームをクリックすると消えるようにする設定
 $('body').on('click', '.vanish', function() {
     $(this).remove()
 })
 
+
+// タブ型ナビゲーション設定
+let tabs = $('.nav-link')
+$('.nav-link').on('click', function() {
+    $('.active').removeClass('active')
+    $(this).addClass('active')
+    const index = tabs.index(this)
+    $('.content').removeClass('show').eq(index).addClass('show')
+})

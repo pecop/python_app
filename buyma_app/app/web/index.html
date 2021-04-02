@@ -8,89 +8,124 @@
     <body>
 
         <div class="container mt-3"> 
+            <!-- アラーム、メッセージ -->
             <div id="message" class="my-3">
                 <div class="alert alert-warning vanish" role="alert">
                   以下を入力し、検索してください
                 </div>
-              </div>
-            <!-- 検索キーワード -->
-            <div class="form-group row">
-                <label for="keyword" class="col-3 col-form-label">検索キーワード</label>
-                <div class="col-9">
-                    <input id="keyword" type="text" name="keyword" placeholder="検索キーワード" value="who.me.see" class="form-control">
-                </div>
             </div>
-            <!-- セール品のみ -->
-            <div class="form-group row">
-                <div class="col-3">チェックボックス</div>
-                <div class="col-9">
-                    <div class="form-check">
-                        <input type="checkbox" name="isSale" id="isSale" class="form-check-input">
-                        <label for="isSale" class="form-check-label">セール商品のみ</label>
-                    </div>
-                </div>
+            <!-- タブ型ナビゲーション -->
+            <div class="nav nav-tabs mb-3">
+                <div class="nav-item"><span class="nav-link active">商品検索</span></div>
+                <div class="nav-item"><span class="nav-link">ショップ検索</span></div>
             </div>
-            <!-- 価格範囲 -->
-            <div class="form-group row">
-                <label for="price-lower" class="col-3 col-form-label">価格範囲</label>
-                <div class="col-9">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            <input id="price-lower" type="number" name="price-lower" class="form-control">
-                        </div>
-                        <div class="col-auto">～</div>
-                        <div class="col-auto">
-                            <input id="price-upper" type="number" name="price-upper" value="100000" class="form-control">
+            <div class="content-area">
+                <div class="content show">
+                    <!-- 検索キーワード -->
+                    <div class="form-group row">
+                        <label for="keyword" class="col-3 col-form-label">検索キーワード</label>
+                        <div class="col-9">
+                            <input id="keyword" type="text" name="keyword" placeholder="検索キーワード" value="who.me.see" class="form-control">
                         </div>
                     </div>
+                    <!-- セール品のみ -->
+                    <div class="form-group row">
+                        <div class="col-3">チェックボックス</div>
+                        <div class="col-9">
+                            <div class="form-check">
+                                <input type="checkbox" name="isSale" id="isSale" class="form-check-input">
+                                <label for="isSale" class="form-check-label">セール商品のみ</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 価格範囲 -->
+                    <div class="form-group row">
+                        <label for="price-lower" class="col-3 col-form-label">価格範囲</label>
+                        <div class="col-9">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <input id="price-lower" type="number" name="price-lower" class="form-control">
+                                </div>
+                                <div class="col-auto">～</div>
+                                <div class="col-auto">
+                                    <input id="price-upper" type="number" name="price-upper" value="100000" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 検索ボタン -->
+                    <div class="form-group text-right">
+                            <button id="search" class="btn btn-primary btn-lg">検索</button>
+                    </div>
+                    <!-- 抽出件数 -->
+                    <div class="form-group row">
+                        <label for="fetch-number" class="col-3 col-form-label">抽出件数</label>
+                        <div class="col-auto">
+                            <input type="number" name="fetch-number" id="fetch-number" class="form-control">
+                        </div>
+                    </div>
+                    <!-- 抽出ボタン -->
+                    <div class="form-group text-right">
+                        <button id="fetch" class="btn btn-success btn-lg" disabled>抽出</button>
+                    </div>
+                    <!-- ファイル名 -->
+                    <div class="form-group row">
+                        <label for="file-name" class="col-3 col-form-label">ファイル名</label>
+                        <div class="col">
+                            <input type="text" name="file-name" id="file-name" class="form-control">
+                        </div>
+                    </div>
+                    <!-- 保存ボタン -->
+                    <div class="form-group text-right">
+                        <button id="save" class="btn btn-primary btn-lg" disabled>CSV保存</button>
+                    </div>
+                    <!-- 抽出データ -->
+                    <div class="form-group">
+                        <a href="#fetch-table" class="btn btn-secondary btn-lg" data-toggle="collapse" role="button">抽出データ</a>
+                    </div>
+                    <!-- 抽出データテーブル -->
+                    <div class="my-3 collapse" id="fetch-table">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-sm">
+                                <thead>
+                                    <th scope="col">ID</th>
+                                    <th scope="col" class="big_col">Name</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Access</th>
+                                    <th scope="col">Like</th>
+                                </thead>
+                                <tbody id="fetch-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <!-- 検索ボタン -->
-            <div class="form-group text-right">
-                    <button id="search" class="btn btn-primary btn-lg">検索</button>
-            </div>
-            <!-- 抽出件数 -->
-            <div class="form-group row">
-                <label for="fetch-number" class="col-3 col-form-label">抽出件数</label>
-                <div class="col-auto">
-                    <input type="number" name="fetch-number" id="fetch-number" class="form-control">
-                </div>
-            </div>
-            <!-- 抽出ボタン -->
-            <div class="form-group text-right">
-                <button id="fetch" class="btn btn-success btn-lg" disabled>抽出</button>
-            </div>
-            <!-- ファイル名 -->
-            <div class="form-group row">
-                <label for="file-name" class="col-3 col-form-label">ファイル名</label>
-                <div class="col">
-                    <input type="text" name="file-name" id="file-name" class="form-control">
-                </div>
-            </div>
-            <!-- 保存ボタン -->
-            <div class="form-group text-right">
-                <button id="save" class="btn btn-primary btn-lg" disabled>CSV保存</button>
-            </div>
-            <!-- 抽出データ -->
-            <div class="form-group">
-                <a href="#fetch-table" class="btn btn-secondary btn-lg" data-toggle="collapse" role="button">抽出データ</a>
-            </div>
-            
-            <div class="my-3 collapse" id="fetch-table">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover table-sm">
-                        <thead>
-                            <th scope="col">ID</th>
-                            <th scope="col" class="big_col">Name</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Access</th>
-                            <th scope="col">Like</th>
-                            <!-- <th scope="col">Category1</th>
-                            <th scope="col">Category2</th>
-                            <th scope="col">Category3</th> -->
-                        </thead>
-                        <tbody id="fetch-tbody"></tbody>
-                    </table>
+                <div class="content">
+                    <!-- 抽出件数 -->
+                    <div class="form-group row">
+                        <label for="fetch-number-shop" class="col-3 col-form-label">抽出件数</label>
+                        <div class="col-auto">
+                            <input type="number" name="fetch-number" id="fetch-number-shop" class="form-control">
+                        </div>
+                    </div>
+                    <!-- 抽出ボタン -->
+                    <div class="form-group text-right">
+                        <button id="fetch-shop" class="btn btn-success btn-lg">抽出</button>
+                    </div>
+                    <!-- ファイル名 -->
+                    <div class="form-group row">
+                        <label for="file-name-shop" class="col-3 col-form-label">ファイル名</label>
+                        <div class="col">
+                            <input type="text" name="file-name" id="file-name-shop" class="form-control">
+                        </div>
+                    </div>
+                    <!-- 保存ボタン -->
+                    <div class="form-group text-right">
+                        <button id="save-shop" class="btn btn-primary btn-lg" disabled>CSV保存</button>
+                    </div>
+                    <!-- 抽出データ -->
+                    <div class="form-group">
+                        <a href="#fetch-table-shop" class="btn btn-secondary btn-lg" data-toggle="collapse" role="button">抽出データ</a>
+                    </div>
                 </div>
             </div>
         </div>

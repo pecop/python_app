@@ -17,3 +17,15 @@ table {
     white-space: nowrap;
     overflow: hidden;
 }
+
+.nav-item span {
+    cursor: pointer;
+}
+
+.content {
+    display: none;
+}
+
+.content.show {
+    display: block;
+}
