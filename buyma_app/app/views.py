@@ -68,7 +68,7 @@ def fetch(fetchNumber):
     try:
         current_url = driver.current_url
         logger.debug(current_url)
-        search_goods.parse_html()
+        search_goods.parse_html(current_url)
         soup = search_goods.soup
 
         item = Item(search_goods.url[:-2])

@@ -76,9 +76,12 @@ class Search():
         self.set_option()
         self.make_url()
     
-    def parse_html(self):
- 
-        self.soup = parse_html(self.search_url)
+    def parse_html(self, current_url=''):
+        
+        if current_url == '':
+            self.soup = parse_html(self.search_url)
+        else:
+            self.soup = parse_html(current_url)
 
 
 class Item():
