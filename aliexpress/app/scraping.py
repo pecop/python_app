@@ -49,3 +49,9 @@ def parse_html(url):
     soup = BeautifulSoup(html.content, 'lxml')
 
     return soup
+
+def parse_html_from_text(text):
+
+    soup = BeautifulSoup(text, 'lxml')
+
+    return soup 
