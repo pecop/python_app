@@ -127,9 +127,8 @@ class Item():
             logger.debug('詳細情報：無し')
 
 
-def search(page=1):
+def search(driver, page=1):
 
-    driver = set_driver() # Seleniumドライバ設定
     url = search_url + page_url_element + str(page) # ページ設定
     get_with_wait(driver, url, isWait=True) # 待機付きページ移動
 
@@ -146,28 +145,23 @@ def search(page=1):
         item.fetch_info(driver) # 不動産ジャパンの必要情報取得
         logger.debug('')
 
-    driver.quit() # ドライバを閉じる⇒閉じずにreturnで戻して再利用した方がドライバ起動分処理を短縮できる（要検討）
-
-    return items
+    return driver, items
 
 # %%
 
-thread_max = 2 # マルチスレッド(並列処理)の最大スレッド数
-page_number = 2 # 検索ページ数(初期設定)
-future_list = [] # スレッドリスト
+driver = set_driver() # Seleniumドライバ設定
+items_list = []
+for i in range(2):
+    driver, items = search(driver, i+1)
+    items_list += items
 
-# 並列処理実行
-with futures.ThreadPoolExecutor(max_workers=thread_max, thread_name_prefix="thread") as executor:
-    for i in range(page_number):
-        future = executor.submit(search, i+1)
-        future_list.append(future)
+# %%
+print(len(items_list))
 
-for future in future_list:
+# %%
 
-    items = future.result()
-
-    for item in items:
-        pprint(item.item_info)
+for item in items_list:
+    pprint(item.item_info)
 
 # %%
 
