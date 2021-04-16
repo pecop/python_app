@@ -7,5 +7,6 @@ spec/
 .env
 build/
 __pycache__/
+profile/
 chromedriver.exe
 post_app
