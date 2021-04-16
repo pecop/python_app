@@ -5,5 +5,5 @@ from dotenv import load_dotenv
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
-USER_NAME = os.environ.get('USER_NAME')
+EMAIL = os.environ.get('EMAIL')
 PASSWORD = os.environ.get('PASSWORD')

@@ -16,6 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.keys import Keys
 
 # Original import
 from scraping import set_driver, get_with_wait, parse_html, parse_html_selenium
@@ -39,7 +40,7 @@ page_url_element = '&page='
 
 # マンションレビューログイン情報取得
 
-USER_NAME = settings.USER_NAME
+EMAIL = settings.EMAIL
 PASSWORD = settings.PASSWORD
 
 # 物件クラス
@@ -185,10 +186,40 @@ review_url = f'https://www.mansion-review.jp/search/result/?mname={keyword}&dire
 driver = set_driver(isHeadless=False, isManager=True) # Seleniumドライバ設定
 get_with_wait(driver, review_url, isWait=True)
 
+# %%
+
+from selenium.webdriver.common.action_chains import ActionChains
+
+wait = WebDriverWait(driver, 10)
+wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.user-icon')))
+driver.find_element_by_css_selector('span.user-icon').click()
+wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[class="login_pop cboxElement"]')))
+driver.find_element_by_css_selector('a[class="login_pop cboxElement"]').click()
+time.sleep(1)
+input_email = driver.find_element_by_css_selector('input.text')
+input_email.send_keys(Keys.CONTROL + 'a')
+input_email.send_keys(Keys.DELETE)
+input_email.send_keys(EMAIL)
+input_password = driver.find_element_by_css_selector('input.password')
+input_password.send_keys(Keys.CONTROL + 'a')
+input_password.send_keys(Keys.DELETE)
+input_password.send_keys(PASSWORD)
+# element = driver.find_element_by_css_selector('input[class="cta_button_input"]')
+# element = driver.find_element_by_css_selector('input[class="cta_button_input search_submit"]')
+element = driver.find_element_by_xpath('//*[@id="loginArea"]/form/table/tbody/tr[3]/td/div/input')
+# element = driver.find_element_by_xpath('/html/body/div[12]/div[1]/div[2]/div[2]/div[1]/div/form/table/tbody/tr[3]/td/div')
+loc = element.location
+x, y = loc['x'], loc['y']
+print(x, y)
+actions = ActionChains(driver)
+actions.move_by_offset(x, y)
+actions.click()
+actions.perform()
+
 
 # %%
 
-print(USER_NAME, PASSWORD)
+print(EMAIL, PASSWORD)
 
 # %%
 
