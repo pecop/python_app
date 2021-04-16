@@ -7,9 +7,10 @@ from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 
 # Seleniumドライバ設定
-def set_driver(isHeadless=False):
+def set_driver(isHeadless=False, isManager=False):
 
     options = ChromeOptions()
 
@@ -27,9 +28,13 @@ def set_driver(isHeadless=False):
 
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--ignore-ssl-errors')
-    options.add_argument('--incognito')
+    # options.add_argument('--incognito') # シークレットモードの設定を付与
+    options.add_argument('--user-data-dir=profile')
 
-    driver = Chrome(executable_path=os.getcwd() + '/' + driver_path, options=options)
+    if isManager:
+        driver = Chrome(ChromeDriverManager().install(), options=options)
+    else:
+        driver = Chrome(executable_path=os.getcwd() + '/' + driver_path, options=options)
     driver.set_window_size('1200', '1000')
 
     return driver

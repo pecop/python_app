@@ -1,0 +1,1529 @@
+jq = typeof(jq) === "undefined" ? jQuery : jq;
+extra_send_hook = typeof(extra_send_hook) === "undefined" ? function(){} : extra_send_hook;
+extra_recv_hook = typeof(extra_recv_hook) === "undefined" ? function(){} : extra_recv_hook;
+extra_reload = typeof(extra_reload) === "undefined" ? function(data){location.reload();} : extra_reload;
+extra_href = typeof(extra_href) === "undefined" ? function(data){location.href = data.res.app_data.href;} : extra_href;
+extra_href_log = typeof(extra_href_log) === "undefined" ? function(href){location.href = href;} : extra_href_log;
+extra_open_log = typeof(extra_open_log) === "undefined" ? function(href){window.open(href, "_blank");} : extra_open_log;
+app = typeof(app) === "undefined" ? {} : app;
+app.data = typeof(app.data) === "undefined" ? {} : app.data;
+
+app.sales = (function() {
+	var
+
+	error_codes = {},
+
+	init = function(spec) {
+		error_codes["NONE"] = 0x00;
+		error_codes["INVALID_TO"] = 0x01;
+		error_codes["INVALID_ID"] = 0x02;
+		error_codes["NOT_FOUND"] = 0x04;
+	},
+
+	rental_mail_send = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data[jq(spec.to).attr("name")] = jq(spec.to).attr("value");
+
+			jq(spec.id + ":hidden").each(function() {
+				if ((jq(this).attr("name") in data) === false) {
+					data[jq(this).attr("name")] = [];
+				}
+				data[jq(this).attr("name")].push(jq(this).attr("value"));
+			});
+
+			function failure() {
+				jq(spec.notice).text("メール送信に失敗しました。時間をおいて再度お試しください。");
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/rental/mail/send/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code === error_codes["INVALID_TO"]) {
+						jq(spec.notice).text("メールアドレスの入力に誤りがあります。");
+						return;
+					}
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.colorbox).colorbox.close();
+					var toast = jq(spec.toast);
+					toast.text("メール送信が完了しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+		});
+	},
+	mansion_mail_send = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data[jq(spec.to).attr("name")] = jq(spec.to).attr("value");
+
+			jq(spec.id + ":hidden").each(function() {
+				if ((jq(this).attr("name") in data) === false) {
+					data[jq(this).attr("name")] = [];
+				}
+				data[jq(this).attr("name")].push(jq(this).attr("value"));
+			});
+
+			function failure() {
+				jq(spec.notice).text("メール送信に失敗しました。時間をおいて再度お試しください。");
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/mansion/mail/send/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code === error_codes["INVALID_TO"]) {
+						jq(spec.notice).text("メールアドレスの入力に誤りがあります。");
+						return;
+					}
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.colorbox).colorbox.close();
+					var toast = jq(spec.toast);
+					toast.text("メール送信が完了しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+		});
+	},
+	land_mail_send = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data[jq(spec.to).attr("name")] = jq(spec.to).attr("value");
+
+			jq(spec.id + ":hidden").each(function() {
+				if ((jq(this).attr("name") in data) === false) {
+					data[jq(this).attr("name")] = [];
+				}
+				data[jq(this).attr("name")].push(jq(this).attr("value"));
+			});
+
+			function failure() {
+				jq(spec.notice).text("メール送信に失敗しました。時間をおいて再度お試しください。");
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/land/mail/send/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code === error_codes["INVALID_TO"]) {
+						jq(spec.notice).text("メールアドレスの入力に誤りがあります。");
+						return;
+					}
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.colorbox).colorbox.close();
+					var toast = jq(spec.toast);
+					toast.text("メール送信が完了しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+		});
+	},
+	house_mail_send = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data[jq(spec.to).attr("name")] = jq(spec.to).attr("value");
+
+			jq(spec.id + ":hidden").each(function() {
+				if ((jq(this).attr("name") in data) === false) {
+					data[jq(this).attr("name")] = [];
+				}
+				data[jq(this).attr("name")].push(jq(this).attr("value"));
+			});
+
+			function failure() {
+				jq(spec.notice).text("メール送信に失敗しました。時間をおいて再度お試しください。");
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/house/mail/send/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code === error_codes["INVALID_TO"]) {
+						jq(spec.notice).text("メールアドレスの入力に誤りがあります。");
+						return;
+					}
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.colorbox).colorbox.close();
+					var toast = jq(spec.toast);
+					toast.text("メール送信が完了しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+		});
+	},
+	shinchiku_mansion_mail_send = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data[jq(spec.to).attr("name")] = jq(spec.to).attr("value");
+
+			jq(spec.id + ":hidden").each(function() {
+				if ((jq(this).attr("name") in data) === false) {
+					data[jq(this).attr("name")] = [];
+				}
+				data[jq(this).attr("name")].push(jq(this).attr("value"));
+			});
+
+			function failure() {
+				jq(spec.notice).text("メール送信に失敗しました。時間をおいて再度お試しください。");
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/shinchiku_mansion/mail/send/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code === error_codes["INVALID_TO"]) {
+						jq(spec.notice).text("メールアドレスの入力に誤りがあります。");
+						return;
+					}
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.colorbox).colorbox.close();
+					var toast = jq(spec.toast);
+					toast.text("メール送信が完了しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+		});
+	},
+	db_mail_send = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data[jq(spec.to).attr("name")] = jq(spec.to).attr("value");
+
+			jq(spec.id + ":hidden").each(function() {
+				if ((jq(this).attr("name") in data) === false) {
+					data[jq(this).attr("name")] = [];
+				}
+				data[jq(this).attr("name")].push(jq(this).attr("value"));
+			});
+
+			function failure() {
+				jq(spec.notice).text("メール送信に失敗しました。時間をおいて再度お試しください。");
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/db/mail/send/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code === error_codes["INVALID_TO"]) {
+						jq(spec.notice).text("メールアドレスの入力に誤りがあります。");
+						return;
+					}
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.colorbox).colorbox.close();
+					var toast = jq(spec.toast);
+					toast.text("メール送信が完了しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+		});
+	},
+
+	rental_mail_send_all = rental_mail_send,
+	mansion_mail_send_all = mansion_mail_send,
+	land_mail_send_all = land_mail_send,
+	house_mail_send_all = house_mail_send,
+	shinchiku_mansion_mail_send_all = shinchiku_mansion_mail_send,
+	db_mail_send_all = db_mail_send,
+
+	rental_mail_send_all_interrupt = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data = {};
+				sources.each(function() {
+					data[jq(this).attr("data-id")] = jq(this).attr("data-id");
+				});
+				var tmp_data = [];
+				for (var key in data) {
+					tmp_data.push(data[key]);
+				}
+				data = tmp_data;
+				$(this).attr("data-id", data.join(","));
+				return true;
+			} else {
+				alert("物件を選択してください。");
+				return false;
+			}
+		});
+	},
+	mansion_mail_send_all_interrupt = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data = {};
+				sources.each(function() {
+					data[jq(this).attr("data-id")] = jq(this).attr("data-id");
+				});
+				var tmp_data = [];
+				for (var key in data) {
+					tmp_data.push(data[key]);
+				}
+				data = tmp_data;
+				$(this).attr("data-id", data.join(","));
+				return true;
+			} else {
+				alert("物件を選択してください。");
+				return false;
+			}
+		});
+	},
+	land_mail_send_all_interrupt = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data = {};
+				sources.each(function() {
+					data[jq(this).attr("data-id")] = jq(this).attr("data-id");
+				});
+				var tmp_data = [];
+				for (var key in data) {
+					tmp_data.push(data[key]);
+				}
+				data = tmp_data;
+				$(this).attr("data-id", data.join(","));
+				return true;
+			} else {
+				alert("物件を選択してください。");
+				return false;
+			}
+		});
+	},
+	house_mail_send_all_interrupt = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data = {};
+				sources.each(function() {
+					data[jq(this).attr("data-id")] = jq(this).attr("data-id");
+				});
+				var tmp_data = [];
+				for (var key in data) {
+					tmp_data.push(data[key]);
+				}
+				data = tmp_data;
+				$(this).attr("data-id", data.join(","));
+				return true;
+			} else {
+				alert("物件を選択してください。");
+				return false;
+			}
+		});
+	},
+	shinchiku_mansion_mail_send_all_interrupt = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data = {};
+				sources.each(function() {
+					data[jq(this).attr("data-id")] = jq(this).attr("data-id");
+				});
+				var tmp_data = [];
+				for (var key in data) {
+					tmp_data.push(data[key]);
+				}
+				data = tmp_data;
+				$(this).attr("data-id", data.join(","));
+				return true;
+			} else {
+				alert("物件を選択してください。");
+				return false;
+			}
+		});
+	},
+	db_mail_send_all_interrupt = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data = {};
+				sources.each(function() {
+					data[jq(this).attr("data-id")] = jq(this).attr("data-id");
+				});
+				var tmp_data = [];
+				for (var key in data) {
+					tmp_data.push(data[key]);
+				}
+				data = tmp_data;
+				$(this).attr("data-id", data.join(","));
+				return true;
+			} else {
+				alert("物件を選択してください。");
+				return false;
+			}
+		});
+	},
+
+	rental_favorites_create = function(spec) {
+		jq(spec.trigger).live("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+			data["from"] = jq(this).attr("data-from");
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りへの登録ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/rental/favorites/create/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					jq(spec.report_to).attr('onclick', 'execPostSalesRentalFavorites();');
+					jq(spec.report_to_link).attr('onclick', 'execPostSalesRentalFavorites();');
+					var toast = jq(spec.toast);
+					if (jq("#js_bottom_fav").size()) {
+						toast.html("お気に入りに登録しました。<br /><span>画面右下の「お気に入り物件を見る」<br />に追加されました。<br />タップするとお気に入りに登録済の物件一覧が<br />表示されます。</span>");
+					} else {
+						toast.html("お気に入りに登録しました。<br /><span>ページ上部ヘッダー右の「お気に入り」のボタンから<br />お気に入りページを確認できます。</span>");
+					}
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+					jq('.bt_header_fav.zero').removeClass('zero');
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	mansion_favorites_create = function(spec) {
+		jq(spec.trigger).live("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+			data["from"] = jq(this).attr("data-from");
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りへの登録ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/mansion/favorites/create/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					jq(spec.report_to).attr('onclick', 'execPostSalesMansionFavorites();');
+					jq(spec.report_to_link).attr('onclick', 'execPostSalesMansionFavorites();');
+					var toast = jq(spec.toast);
+					if (jq("#js_bottom_fav").size()) {
+						toast.html("お気に入りに登録しました。<br /><span>画面右下の「お気に入り物件を見る」<br />に追加されました。<br />タップするとお気に入りに登録済の物件一覧が<br />表示されます。</span>");
+					} else {
+						toast.html("お気に入りに登録しました。<br /><span>ページ上部ヘッダー右の「お気に入り」のボタンから<br />お気に入りページを確認できます。</span>");
+					}
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+					jq('.bt_header_fav.zero').removeClass('zero');
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	shinchiku_mansion_favorites_create = function(spec) {
+		jq(spec.trigger).live("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+			data["from"] = jq(this).attr("data-from");
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りへの登録ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/shinchiku_mansion/favorites/create/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					jq(spec.report_to).attr('onclick', 'execPostSalesShinchikuMansionFavorites();');
+					jq(spec.report_to_link).attr('onclick', 'execPostSalesShinchikuMansionFavorites();');
+					var toast = jq(spec.toast);
+					if (jq("#js_bottom_fav").size()) {
+						toast.html("お気に入りに登録しました。<br /><span>画面右下の「お気に入り物件を見る」<br />に追加されました。<br />タップするとお気に入りに登録済の物件一覧が<br />表示されます。</span>");
+					} else {
+						toast.html("お気に入りに登録しました。<br /><span>ページ上部ヘッダー右の「お気に入り」のボタンから<br />お気に入りページを確認できます。</span>");
+					}
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+					jq('.bt_header_fav.zero').removeClass('zero');
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	db_favorites_create = function(spec) {
+		jq(spec.trigger).live("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+			data["from"] = jq(this).attr("data-from");
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りへの登録ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/db/favorites/create/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					jq(spec.report_to).attr('onclick', 'execPostSalesDBFavorites();');
+					jq(spec.report_to_link).attr('onclick', 'execPostSalesDBFavorites();');
+					var toast = jq(spec.toast);
+					if (jq("#js_bottom_fav").size()) {
+						toast.html("お気に入りに登録しました。<br /><span>画面右下の「お気に入り物件を見る」<br />に追加されました。<br />タップするとお気に入りに登録済の物件一覧が<br />表示されます。</span>");
+					} else {
+						toast.html("お気に入りに登録しました。<br /><span>ページ上部ヘッダー右の「お気に入り」のボタンから<br />お気に入りページを確認できます。</span>");
+					}
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+					jq('.bt_header_fav.zero').removeClass('zero');
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	land_favorites_create = function(spec) {
+		jq(spec.trigger).live("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+			data["from"] = jq(this).attr("data-from");
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りへの登録ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/land/favorites/create/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					jq(spec.report_to).attr('onclick', 'execPostSalesLandFavorites();');
+					jq(spec.report_to_link).attr('onclick', 'execPostSalesLandFavorites();');
+					var toast = jq(spec.toast);
+					if (jq("#js_bottom_fav").size()) {
+						toast.html("お気に入りに登録しました。<br /><span>画面右下の「お気に入り物件を見る」<br />に追加されました。<br />タップするとお気に入りに登録済の物件一覧が<br />表示されます。</span>");
+					} else {
+						toast.html("お気に入りに登録しました。<br /><span>ページ上部ヘッダー右の「お気に入り」のボタンから<br />お気に入りページを確認できます。</span>");
+					}
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+					jq('.bt_header_fav.zero').removeClass('zero');
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	house_favorites_create = function(spec) {
+		jq(spec.trigger).live("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+			data["from"] = jq(this).attr("data-from");
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りへの登録ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/house/favorites/create/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					jq(spec.report_to).attr('onclick', 'execPostSalesHouseFavorites();');
+					jq(spec.report_to_link).attr('onclick', 'execPostSalesHouseFavorites();');
+					var toast = jq(spec.toast);
+					if (jq("#js_bottom_fav").size()) {
+						toast.html("お気に入りに登録しました。<br /><span>画面右下の「お気に入り物件を見る」<br />に追加されました。<br />タップするとお気に入りに登録済の物件一覧が<br />表示されます。</span>");
+					} else {
+						toast.html("お気に入りに登録しました。<br /><span>ページ上部ヘッダー右の「お気に入り」のボタンから<br />お気に入りページを確認できます。</span>");
+					}
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+					jq('.bt_header_fav.zero').removeClass('zero');
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+
+	rental_favorites_delete = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+			var elemid=jq(this).attr("id");
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りの削除ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+			var that = this;
+			jq.ajax({
+				type: "POST",
+				url: "/sales/rental/favorites/delete/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					jq(that).parents('div.la_item').remove();
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					var toast = jq(spec.toast);
+					toast.text("お気に入りから削除しました。");
+					toast.fadeIn();
+
+
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	mansion_favorites_delete = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りの削除ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+			var that = this;
+			jq.ajax({
+				type: "POST",
+				url: "/sales/mansion/favorites/delete/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					jq(that).parents('div.la_item').remove();
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					var toast = jq(spec.toast);
+					toast.text("お気に入りから削除しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	shinchiku_mansion_favorites_delete = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りの削除ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+			var that = this;
+			jq.ajax({
+				type: "POST",
+				url: "/sales/shinchiku_mansion/favorites/delete/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					jq(that).parents('div.la_item').remove();
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					var toast = jq(spec.toast);
+					toast.text("お気に入りから削除しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	db_favorites_delete = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りの削除ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+			var that = this;
+			jq.ajax({
+				type: "POST",
+				url: "/sales/db/favorites/delete/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					jq(that).parents('div.la_item').remove();
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					var toast = jq(spec.toast);
+					toast.text("お気に入りから削除しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	land_favorites_delete = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りの削除ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+			var that = this;
+			jq.ajax({
+				type: "POST",
+				url: "/sales/land/favorites/delete/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					jq(that).parents('div.la_item').remove();
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					var toast = jq(spec.toast);
+					toast.text("お気に入りから削除しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+	house_favorites_delete = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var data = {};
+
+			data["id"] = [];
+			data["id"].push(jq(this).attr("data-id"));
+
+			function failure() {
+				var toast = jq(spec.toast);
+				toast.html("お気に入りの削除ができませんでした。<br />時間をおいて再度お試しください。");
+				toast.fadeIn();
+				setTimeout(function() {
+					toast.fadeOut();
+				}, 4500);
+			}
+			var that = this;
+			jq.ajax({
+				type: "POST",
+				url: "/sales/house/favorites/delete/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					jq(that).parents('div.la_item').remove();
+					extra_recv_hook(data);
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+					var toast = jq(spec.toast);
+					toast.text("お気に入りから削除しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+
+			return false;
+		});
+	},
+
+
+
+
+	inquire = function(spec) {
+		jq(spec.triggers).live("click", function() {
+			app.fn.js_track_transaction(app.data.criteo_q["HashedEmail"], app.data.criteo_q["SiteType"], app.data.criteo_q["JsTrackTransactionItemIdList"]);
+
+			var self = jq(this);
+			if (self.prop("tagName") === "A") {
+				var href = self.attr("href");
+				var target = self.attr("target");
+				yahoo_report_conversion();
+				goog_report_conversion();
+				setTimeout(function() {
+					if (self.attr("data-method") === "post") {
+						execHomesPost(href);
+					} else {
+						if (target === "_blank") {
+							extra_open_log(href);
+						} else {
+							extra_href_log(href);
+						}
+					}
+				}, 100);
+				return false;
+			} else if (self.prop("tagName") === "INPUT" || self.prop("tagName") === "BUTTON") {
+				setTimeout(function() {
+					self.closest("form").submit();
+				}, 100);
+				return false;
+			}
+		});
+	},
+
+	inquire_all = function(spec) {
+		jq(spec.triggers).live("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var pkeys = [];
+				var prefix = /chintai|rental|\/rent.html$|\/rent\/$/.test(location.pathname) ? 'BRent_' : 'BSale_';
+
+				sources.each(function() {
+					pkeys.push(prefix + jq(this).attr("data-id"));
+				});
+
+				pkeys = pkeys.filter(
+					function(temp_value, temp_index) {
+						return (temp_index == pkeys.indexOf(temp_value));
+					}
+				);
+
+				app.fn.js_track_transaction(app.data.criteo_q["HashedEmail"], app.data.criteo_q["SiteType"], app.data.criteo_q["JsTrackTransactionItemIdList"]);
+				yahoo_report_conversion();
+				goog_report_conversion();
+
+				var self = this;
+				setTimeout(function() {
+					jq(self).next().find('input[name="pkey"]').val(pkeys.join(',')).end().submit();
+				}, 100);
+			} else {
+				alert("物件を選択してください。");
+			}
+		});
+	},
+
+	favorite_create_all = function(spec) {
+		jq(spec.triggers).live("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data = {};
+				data["id"] = [];
+				var type = "default";
+				sources.each(function() {
+					data["id"].push(jq(this).attr("data-id"));
+					type = jq(this).attr("data-type");
+				});
+
+				function failure() {
+					var toast = jq(spec.toast);
+					toast.html("お気に入りへの登録ができませんでした。<br />時間をおいて再度お試しください。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				}
+
+				jq.ajax({
+					type: "POST",
+					url: "/sales/" + type + "/favorites/create/",
+					data: data,
+					dataType: "json",
+					success: function(data) {
+						extra_recv_hook(data);
+						jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+						type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+						post_name = 'execPostSales' + type + 'Favorites();';
+						jq(spec.report_to).attr('onclick', post_name);
+						jq(spec.report_to_link).attr('onclick', post_name);
+						var toast = jq(spec.toast);
+						if (jq("#js_bottom_fav").size()) {
+							toast.html("お気に入りに登録しました。<br /><span>画面右下の「お気に入り物件を見る」<br />に追加されました。<br />タップするとお気に入りに登録済の物件一覧が<br />表示されます。</span>");
+						} else {
+							toast.html("お気に入りに登録しました。<br /><span>ページ上部ヘッダー右の「お気に入り」のボタンから<br />お気に入りページを確認できます。</span>");
+						}
+						toast.fadeIn();
+						setTimeout(function() {
+							toast.fadeOut();
+						}, 4500);
+					},
+					error: function(xhr) {
+						extra_recv_hook(xhr);
+						failure();
+					},
+					beforeSend: function() {
+						extra_send_hook(this);
+					}
+				});
+			} else {
+				alert("物件を選択してください。");
+			}
+		});
+	},
+
+
+
+	favorite_delete_all = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				if (confirm("選択した物件をお気に入りから削除します。\nよろしいですか？") === false) {
+					return;
+				}
+
+				var data = {};
+				data["id"] = [];
+				var type = "default";
+				sources.each(function() {
+					data["id"].push(jq(this).attr("data-id"));
+					type = jq(this).attr("data-type");
+				});
+
+				function failure() {
+					var toast = jq(spec.toast);
+					toast.html("お気に入りの削除ができませんでした。<br />時間をおいて再度お試しください。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				}
+
+				jq.ajax({
+					type: "POST",
+					url: "/sales/" + type + "/favorites/delete/",
+					data: data,
+					dataType: "json",
+					success: function(data) {
+						sources.each(function() {
+							jq(this).parents('div.la_item').remove();
+						});
+						extra_recv_hook(data);
+						if (data.res.app_data.count <= 0) {
+							extra_reload(data);
+							return;
+						}
+						jq(spec.report_to).text(data.res.app_data.count);
+jq(spec.report_to).attr("value", data.res.app_data.count);
+						var toast = jq(spec.toast);
+						toast.text("お気に入りから削除しました。");
+						toast.fadeIn();
+						setTimeout(function() {
+							toast.fadeOut();
+						}, 4500);
+					},
+					error: function(xhr) {
+						extra_recv_hook(xhr);
+						failure();
+					},
+					beforeSend: function() {
+						extra_send_hook(this);
+					}
+				});
+			} else {
+				alert("物件を選択してください。");
+			}
+		});
+	},
+
+
+
+
+	comparison_all = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var type = "default";
+				var data = {};
+				data["id"] = [];
+				sources.each(function() {
+					data["id"].push(jq(this).attr("data-id"));
+					type = jq(this).attr("data-type");
+				});
+				data["id"] = data["id"].join(",");
+				execPostBlank("/sales/" + type + "/comparison/", data);
+			} else {
+				alert("物件を選択してください。");
+			}
+		});
+	},
+
+	delete_column = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var self = jq(this);
+			var n = self.closest("tr").children("td").index(self.closest("td"));
+			self.closest("tbody").children("tr").each(function() {
+				jq(this).children("td:eq(" + n + ")").fadeOut("normal", function() {
+					jq(this).remove();
+				});
+			});
+		});
+	},
+
+	//スマホ用
+	delete_column_m = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var self = jq(this);
+			var rowNo = self.attr("data-column");
+			//alert(self.attr("data-column"));
+			jq(".hikaku_tbl tr[data-column=" + rowNo + "]").fadeOut("normal", function() {
+				jq(this).remove();
+			});
+			jq(".hikaku_title_tbl tr[data-column=" + rowNo + "]").fadeOut("normal", function() {
+				jq(this).remove();
+			});
+		});
+	},
+
+	delete_column_all = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data_columns = {};
+				sources.each(function() {
+					data_columns[jq(this).attr("data-column")] = jq(this).attr("data-column");
+				});
+				var tmp_data_columns = [];
+				for (var key in data_columns) {
+					tmp_data_columns.push(data_columns[key]);
+				}
+				data_columns = tmp_data_columns;
+				for (var i = 0; i < data_columns.length; i++) {
+					jq(spec.sources).closest("tbody").children("tr").children("td[data-column=" + data_columns[i] + "]").fadeOut("normal", function() {
+						jq(this).remove();
+					});
+				}
+			} else {
+				alert("物件を選択してください。");
+			}
+		});
+	},
+
+	delete_column_all_m = function(spec) {
+		jq(spec.triggers).bind("click", function() {
+			var sources = jq(spec.sources).filter(":checked");
+			if (sources.size()) {
+				var data_columns = {};
+				sources.each(function() {
+					data_columns[jq(this).attr("data-column")] = jq(this).attr("data-column");
+				});
+				var tmp_data_columns = [];
+				for (var key in data_columns) {
+					tmp_data_columns.push(data_columns[key]);
+				}
+				data_columns = tmp_data_columns;
+				for (var i = 0; i < data_columns.length; i++) {
+					jq(".hikaku_tbl tr[data-column=" + data_columns[i] + "]").fadeOut("normal", function() {
+						jq(this).remove();
+					});
+					jq(".hikaku_title_tbl tr[data-column=" + data_columns[i] + "]").fadeOut("normal", function() {
+						jq(this).remove();
+					});
+				}
+			} else {
+				alert("物件を選択してください。");
+			}
+		});
+	},
+
+	announcement_regist_colorbox = function(spec) {
+		var trigger = jq(spec.trigger);
+		trigger.bind("click", function() {
+			var data = {};
+
+			data[jq(spec.to).attr("name")] = jq(spec.to).attr("value");
+			data["id"] = jq(spec.to).data("id");
+			data["area"] = jq(spec.to).data("area");
+			data["form"] = trigger.attr("data-form");
+
+			function failure() {
+				jq(spec.notice).text("物件お知らせサービスへの登録ができませんでした。時間をおいて再度お試しください。");
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/rental/announcement/regist/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code === error_codes["INVALID_TO"]) {
+						jq(spec.notice).text("メールアドレスの入力に誤りがあります。");
+						return;
+					}
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					jq(spec.colorbox).colorbox.close();
+					var toast = jq(spec.toast);
+					toast.text("物件お知らせサービスに登録しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+		});
+	},
+
+	announcement_regist = function(spec) {
+		jq(spec.trigger).bind("click", function() {
+			var self = jq(this);
+			var notice = self.closest("div.search_mail_area").find("p.js_bukken_announcement_service_error");
+
+			var data = {};
+
+			var form = self.closest("form");
+			var to = form.find(spec.to);
+			data[to.attr("name")] = to.attr("value");
+			data["id"] = to.data("id");
+			data["area"] = to.data("area");
+			data["form"] = form.serialize();
+
+			function failure() {
+				notice.text("物件お知らせサービスへの登録ができませんでした。時間をおいて再度お試しください。");
+			}
+
+			jq.ajax({
+				type: "POST",
+				url: "/sales/rental/announcement/regist/",
+				data: data,
+				dataType: "json",
+				success: function(data) {
+					extra_recv_hook(data);
+					if (data.res.error_code === error_codes["INVALID_TO"]) {
+						notice.text("メールアドレスの入力に誤りがあります。");
+						return;
+					}
+					if (data.res.error_code) {
+						failure();
+						return;
+					}
+					notice.text("");
+					var toast = jq(spec.toast);
+					toast.text("物件お知らせサービスに登録しました。");
+					toast.fadeIn();
+					setTimeout(function() {
+						toast.fadeOut();
+					}, 4500);
+				},
+				error: function(xhr) {
+					extra_recv_hook(xhr);
+					failure();
+				},
+				beforeSend: function() {
+					extra_send_hook(this);
+				}
+			});
+		});
+	},
+
+	end = true;
+
+	return {
+		init : init,
+		rental_mail_send : rental_mail_send,
+		rental_mail_send_all : rental_mail_send_all,
+		rental_mail_send_all_interrupt : rental_mail_send_all_interrupt,
+		rental_favorites_create : rental_favorites_create,
+		rental_favorites_delete : rental_favorites_delete,
+		mansion_mail_send : mansion_mail_send,
+		mansion_mail_send_all : mansion_mail_send_all,
+		mansion_mail_send_all_interrupt : mansion_mail_send_all_interrupt,
+		mansion_favorites_create : mansion_favorites_create,
+		mansion_favorites_delete : mansion_favorites_delete,
+		shinchiku_mansion_mail_send : shinchiku_mansion_mail_send,
+		shinchiku_mansion_mail_send_all : shinchiku_mansion_mail_send_all,
+		shinchiku_mansion_mail_send_all_interrupt : shinchiku_mansion_mail_send_all_interrupt,
+		shinchiku_mansion_favorites_create : shinchiku_mansion_favorites_create,
+		shinchiku_mansion_favorites_delete : shinchiku_mansion_favorites_delete,
+		db_mail_send : db_mail_send,
+		db_mail_send_all : db_mail_send_all,
+		db_mail_send_all_interrupt : db_mail_send_all_interrupt,
+		db_favorites_create : db_favorites_create,
+		db_favorites_delete : db_favorites_delete,
+		land_mail_send : land_mail_send,
+		land_mail_send_all : land_mail_send_all,
+		land_mail_send_all_interrupt : land_mail_send_all_interrupt,
+		land_favorites_create : land_favorites_create,
+		land_favorites_delete : land_favorites_delete,
+		house_mail_send : house_mail_send,
+		house_mail_send_all : house_mail_send_all,
+		house_mail_send_all_interrupt : house_mail_send_all_interrupt,
+		house_favorites_create : house_favorites_create,
+		house_favorites_delete : house_favorites_delete,
+		inquire : inquire,
+		inquire_all : inquire_all,
+		favorite_create_all : favorite_create_all,
+		favorite_delete_all : favorite_delete_all,
+		comparison_all : comparison_all,
+		delete_column : delete_column,
+		delete_column_all : delete_column_all,
+		delete_column_m : delete_column_m,
+		delete_column_all_m : delete_column_all_m,
+		announcement_regist_colorbox : announcement_regist_colorbox,
+		announcement_regist : announcement_regist,
+
+		end : end
+	};
+})();
+app.sales.init();

@@ -4,6 +4,7 @@ spec/
 *.csv
 *.log
 *.spec
+.env
 build/
 __pycache__/
 chromedriver.exe
