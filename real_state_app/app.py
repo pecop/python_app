@@ -18,7 +18,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import (
+    WebDriverException,
+    InvalidArgumentException,
+)
+
 
 # Original import
 from logger import logger
@@ -31,20 +35,24 @@ top_url = 'https://www.fudousan.or.jp'
 search_url = 'https://www.fudousan.or.jp/property/buy/13/area/list?m_adr%5B%5D=13101&m_adr%5B%5D=13102&m_adr%5B%5D=13103&m_adr%5B%5D=13104&m_adr%5B%5D=13105&m_adr%5B%5D=13106&m_adr%5B%5D=13107&m_adr%5B%5D=13108&m_adr%5B%5D=13109&m_adr%5B%5D=13110&m_adr%5B%5D=13111&m_adr%5B%5D=13112&m_adr%5B%5D=13113&m_adr%5B%5D=13114&m_adr%5B%5D=13115&m_adr%5B%5D=13116&m_adr%5B%5D=13117&m_adr%5B%5D=13118&m_adr%5B%5D=13119&m_adr%5B%5D=13120&m_adr%5B%5D=13121&m_adr%5B%5D=13122&m_adr%5B%5D=13123&ptm%5B%5D=0103&price_b_from=&price_b_to=&keyword=&eki_walk=&bus_walk=&exclusive_area_from=&exclusive_area_to=&exclusive_area_from=&exclusive_area_to=&built='
 page_url_element = '&page='
 
-# マンションレビューログイン情報取得
 
-
-class NoEmailPassword(Exception):
+# オリジナルエラー
+class NoEmailPassword(Exception):  # EmailとPasswordが設定されてない
     pass
 
 
+class NoSelector(Exception):  # セレクタが見つからない
+    pass
+
+
+# マンションレビューログイン情報取得
 try:
     EMAIL = settings.EMAIL
     PASSWORD = settings.PASSWORD
     if EMAIL is None or PASSWORD is None:
         raise NoEmailPassword
 except NoEmailPassword:
-    logger.error('.envファイルを作成し、マンションレビューのログイン情報(emailとpassword)を入力してください！')
+    logger.error('.envファイルを作成し、マンションレビューのログイン情報(emailとpassword)を入力してください。')
     sys.exit()
 
 
@@ -96,19 +104,24 @@ class Item():
     # 物件名取得
     def fetch_name(self, soup):
 
+        name = soup.select_one('h1.detail-h1')
         try:
-            name = soup.select_one('h1.detail-h1').get_text(strip=True)
-            # スペースや改行などの不要な文字列を削除
-            name = name.replace('?', '')
-            if name != '':  # 物件名有無の判定
-                self.item_info['name'] = name
-                self.isName = True
-                self.countup()
-                logger.debug(f'物件名：{name}')
-            else:
-                logger.debug('物件名：無し')
-        except Exception as err:
-            logger.error(err)
+            if name is None:
+                raise NoSelector
+        except NoSelector:
+            logger.error('物件名が見つかりません。セレクタが変更されている可能性があります。')
+            sys.exit()  # セレクタが見つからなければ、終了する。
+        name = name.get_text(strip=True)
+
+        # スペースや改行などの不要な文字列を削除
+        name = name.replace('?', '')
+
+        if name != '':  # 物件名有無の判定
+            self.item_info['name'] = name
+            self.isName = True
+            self.countup()
+            logger.debug(f'物件名：{name}')
+        else:
             logger.debug('物件名：無し')
 
     # 価格取得
@@ -132,20 +145,48 @@ class Item():
     # 所在地、専有面積、築年月、現況、引渡し時期、備考1
     def fetch_table_info(self, soup):
 
-        try:
-            table_info_val = soup.select('div[class="detail-info"] td[class^="info-val"]')
-            place = self.item_info['place'] = (table_info_val[3].get_text(strip=True)).replace('周辺地図', '')  # 不要文字列削除
-            area = self.item_info['area'] = float((table_info_val[9].get_text(strip=True)).replace('㎡', '').replace('壁芯', '').replace('内法', ''))  # 不要文字列削除
-            age = self.item_info['age'] = table_info_val[25].get_text(strip=True)
-            situation = self.item_info['situation'] = table_info_val[38].get_text(strip=True)
-            delivery = self.item_info['delivery'] = table_info_val[44].get_text(strip=True)
-            remark = self.item_info['remark'] = table_info_val[49].get_text(strip=True)
+        table_selector = 'div[class="detail-info"] td[class^="info-val"]'
+        table_info_val = soup.select(table_selector)
 
-            logger.debug(f'所在地：{place}, 専有面積：{area}, 築年月：{age}')
-            logger.debug(f'現況：{situation}, 引渡し時期：{delivery}, 備考1：{remark}')
-        except Exception as err:
+        try:
+            if not table_info_val:
+                raise NoSelector
+        except NoSelector:
+            logger.error('物件詳細情報の表が見つかりません。セレクタが変更されている可能性があります。')
+            sys.exit()
+
+        place = table_info_val[3].get_text(strip=True)
+        place = place.replace('周辺地図', '')  # 不要文字列削除
+        self.item_info['place'] = place
+
+        area = table_info_val[9].get_text(strip=True)
+        area = area.replace('㎡', '')  # 不要文字列削除
+        area = area.replace('壁芯', '').replace('内法', '')  # 不要文字列削除
+        try:
+            self.item_info['area'] = float(area)
+        except ValueError as err:
             logger.error(err)
-            logger.debug('詳細情報：無し')
+            logger.error('専有面積の文字列⇒数値変換に失敗しました。不要文字列を追加するなどしてください。')
+            sys.exit()
+
+        age = table_info_val[25]
+        age = age.get_text(strip=True)
+        self.item_info['age'] = age
+
+        situation = table_info_val[38]
+        situation = situation.get_text(strip=True)
+        self.item_info['situation'] = situation
+
+        delivery = table_info_val[44]
+        delivery = delivery.get_text(strip=True)
+        self.item_info['delivery'] = delivery
+
+        remark = table_info_val[49]
+        remark = remark.get_text(strip=True)
+        self.item_info['remark'] = remark
+
+        logger.debug(f'所在地：{place}, 専有面積：{area}㎡, 築年月：{age}')
+        logger.debug(f'現況：{situation}, 引渡し時期：{delivery}, 備考1：{remark}')
 
 
 def search(driver, page=1):
@@ -155,6 +196,12 @@ def search(driver, page=1):
 
     soup = parse_html_selenium(driver)
     item_nodes = soup.select('a.prop-title-link')  # 各物件のURLが格納されているaタグを取得
+    try:
+        if not item_nodes:
+            raise NoSelector
+    except NoSelector:
+        logger.error('物件リンク(aタグ)が見つかりません。セレクタが変更されている可能性があります。')
+        sys.exit()  # セレクタが見つからなければ、終了する。
     items = []
 
     for node in item_nodes:
@@ -173,26 +220,42 @@ def search(driver, page=1):
 
 driver = set_driver(isHeadless=False, isManager=True)  # Seleniumドライバ設定
 
-if driver is None:
+if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
     sys.exit()
+
+search(driver)
 
 # %%
 
-items_list = []
-for i in range(1):
-    driver, items = search(driver, i+1)
-    items_list += items
+# items_list = []
+# for i in range(1):
+#     driver, items = search(driver, i+1)
+#     items_list += items
 
 # %%
 
 # logger.debug(f'アイテム数：{Item.isName_count}/{len(items_list)}')
-
-# %%
-
-# %%
-
 # for item in items_list:
 #     pprint(item.item_info)
+
+# %%
+
+# url = 'https://www.fudousan.or.jp/property/detail?p_no=000004123049'
+# # url = 'https://www.fudousan.or.jp/property/detail?p_no=000004134652'
+# get_with_wait(driver, url, isWait=True)  # 待機付きページ移動
+# soup = parse_html_selenium(driver)
+
+# name = soup.select_one('h1.detail-h1')
+# try:
+#     if name is None:
+#         raise NoSelector
+# except NoSelector:
+#     sys.exit()  # セレクタが見つからなければ、終了する。
+# name = name.get_text(strip=True)
+
+# print(name)
+
+# %%
 
 # %%
 

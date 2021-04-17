@@ -42,7 +42,7 @@
 
 3. 以下のURLに移動するので、このURLからスクレイピングを開始する。ページ指定する場合は、下記URLに`&page={number}`を付与(n: ページ数)する。
 
-- スクレイピング対象URL: https://www.fudousan.or.jp/property/buy/13/area/list?m_adr%5B%5D=13101&m_adr%5B%5D=13102&m_adr%5B%5D=13103&m_adr%5B%5D=13104&m_adr%5B%5D=13105&m_adr%5B%5D=13106&m_adr%5B%5D=13107&m_adr%5B%5D=13108&m_adr%5B%5D=13109&m_adr%5B%5D=13110&m_adr%5B%5D=13111&m_adr%5B%5D=13112&m_adr%5B%5D=13113&m_adr%5B%5D=13114&m_adr%5B%5D=13115&m_adr%5B%5D=13116&m_adr%5B%5D=13117&m_adr%5B%5D=13118&m_adr%5B%5D=13119&m_adr%5B%5D=13120&m_adr%5B%5D=13121&m_adr%5B%5D=13122&m_adr%5B%5D=13123&m_adr%5B%5D=13201&m_adr%5B%5D=13202&m_adr%5B%5D=13203&m_adr%5B%5D=13204&m_adr%5B%5D=13205&m_adr%5B%5D=13206&m_adr%5B%5D=13207&m_adr%5B%5D=13208&m_adr%5B%5D=13209&m_adr%5B%5D=13210&m_adr%5B%5D=13211&m_adr%5B%5D=13212&m_adr%5B%5D=13213&m_adr%5B%5D=13214&m_adr%5B%5D=13215&m_adr%5B%5D=13218&m_adr%5B%5D=13219&m_adr%5B%5D=13220&m_adr%5B%5D=13221&m_adr%5B%5D=13222&m_adr%5B%5D=13223&m_adr%5B%5D=13224&m_adr%5B%5D=13225&m_adr%5B%5D=13227&m_adr%5B%5D=13228&m_adr%5B%5D=13229&ptm%5B%5D=0103&price_b_from=&price_b_to=30000000&keyword=&eki_walk=&bus_walk=&exclusive_area_from=&exclusive_area_to=&exclusive_area_from=&exclusive_area_to=&built=
+- [スクレイピング対象URL](https://www.fudousan.or.jp/property/buy/13/area/list?m_adr%5B%5D=13101&m_adr%5B%5D=13102&m_adr%5B%5D=13103&m_adr%5B%5D=13104&m_adr%5B%5D=13105&m_adr%5B%5D=13106&m_adr%5B%5D=13107&m_adr%5B%5D=13108&m_adr%5B%5D=13109&m_adr%5B%5D=13110&m_adr%5B%5D=13111&m_adr%5B%5D=13112&m_adr%5B%5D=13113&m_adr%5B%5D=13114&m_adr%5B%5D=13115&m_adr%5B%5D=13116&m_adr%5B%5D=13117&m_adr%5B%5D=13118&m_adr%5B%5D=13119&m_adr%5B%5D=13120&m_adr%5B%5D=13121&m_adr%5B%5D=13122&m_adr%5B%5D=13123&m_adr%5B%5D=13201&m_adr%5B%5D=13202&m_adr%5B%5D=13203&m_adr%5B%5D=13204&m_adr%5B%5D=13205&m_adr%5B%5D=13206&m_adr%5B%5D=13207&m_adr%5B%5D=13208&m_adr%5B%5D=13209&m_adr%5B%5D=13210&m_adr%5B%5D=13211&m_adr%5B%5D=13212&m_adr%5B%5D=13213&m_adr%5B%5D=13214&m_adr%5B%5D=13215&m_adr%5B%5D=13218&m_adr%5B%5D=13219&m_adr%5B%5D=13220&m_adr%5B%5D=13221&m_adr%5B%5D=13222&m_adr%5B%5D=13223&m_adr%5B%5D=13224&m_adr%5B%5D=13225&m_adr%5B%5D=13227&m_adr%5B%5D=13228&m_adr%5B%5D=13229&ptm%5B%5D=0103&price_b_from=&price_b_to=30000000&keyword=&eki_walk=&bus_walk=&exclusive_area_from=&exclusive_area_to=&exclusive_area_from=&exclusive_area_to=&built=)
 
 
 4. 各物件のURLを取得
@@ -60,3 +60,23 @@
 
 9.  不動産ジャパンのページ移動し、4-5項を物件が100件になるまで繰り返す。
 10. 抽出した情報をエクセル形式(.xlsx)で保存する。ファイル名は`日付_東京都_マンション.xlsx`とする。
+
+
+## 使用方法
+
+1. 同じバージョンのPythonをインストール
+2. 仮想環境を作成(pipenv推奨)
+3. 仮想環境起動(pipenv shell)
+4. requirements.txtをダウンロードして、仮想環境のルートディレクトリに保存
+5. pip install(pipenv install -r ./requirements.txt)
+6. .envをルートディレクトリに作成
+7. 実行(python app.py)
+
+#### .envフォーマット
+
+ファイル名称は`.env`とし、変更しないこと。
+
+```
+EMAIL=XXX.com
+PASSWORD=YYY
+```
