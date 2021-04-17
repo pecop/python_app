@@ -3,6 +3,7 @@
 # General import
 import sys
 import time
+import re
 import pandas as pd
 from pprint import pprint
 from collections import defaultdict
@@ -20,6 +21,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (
     WebDriverException,
     InvalidArgumentException,
+    NoSuchElementException,
+    TimeoutException,
 )
 
 
@@ -41,6 +44,10 @@ class NoEmailPassword(Exception):  # EmailとPasswordが設定されてない
 
 
 class NoSelector(Exception):  # セレクタが見つからない
+    pass
+
+
+class CannotLogin(Exception):  # ログインできない
     pass
 
 
@@ -126,18 +133,23 @@ class Item():
     # 価格取得
     def fetch_price(self, soup):
 
+
+        price = soup.select_one('div.price')
         try:
-            price = soup.select_one('div.price').get_text(strip=True)
-            # スペースや改行、日本語、カンマなどの不要な文字列を削除
-            price = price.replace(':', '').replace('：', '').replace(',', '')
-            price = price.replace('万円', '').replace('価格', '').replace('億', '')
-            if price != '':
-                self.item_info['price'] = int(price)
-                logger.debug(f'価格：{price}万円')
-            else:
-                logger.debug('価格：無し')
-        except Exception as err:
-            logger.error(err)
+            if price is None:
+                raise NoSelector
+        except NoSelector:
+            logger.error('価格が見つかりません。セレクタが変更されている可能性があります。')
+            sys.exit()  # セレクタが見つからなければ、終了する。
+
+        price = price.get_text(strip=True)
+        # スペースや改行、日本語、カンマなどの不要な文字列を削除
+        price = price.replace(':', '').replace('：', '').replace(',', '')
+        price = price.replace('万円', '').replace('価格', '').replace('億', '')
+        if price != '':
+            self.item_info['price'] = int(price)
+            logger.debug(f'価格：{price}万円')
+        else:
             logger.debug('価格：無し')
 
     # 表から以下の情報を取得
@@ -222,7 +234,7 @@ driver = set_driver(isHeadless=False, isManager=True)  # Seleniumドライバ設
 if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
     sys.exit()
 
-# search(driver)
+search(driver)
 
 # %%
 
@@ -249,20 +261,115 @@ get_with_wait(driver, review_url, isWait=True)
 
 # %%
 
-wait = WebDriverWait(driver, 10)
-wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.user-icon')))
-driver.find_element_by_css_selector('span.user-icon').click()
-wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[class="login_pop cboxElement"]')))
-driver.find_element_by_css_selector('a[class="login_pop cboxElement"]').click()
-time.sleep(1)
-input_email = driver.find_element_by_css_selector('input.text')
-input_email.send_keys(Keys.CONTROL + 'a')
-input_email.send_keys(Keys.DELETE)
-input_email.send_keys(EMAIL)
-input_password = driver.find_element_by_css_selector('input.password')
-input_password.send_keys(Keys.CONTROL + 'a')
-input_password.send_keys(Keys.DELETE)
-input_password.send_keys(PASSWORD)
-driver.find_element_by_name('login').click()
+soup = parse_html_selenium(driver)
+login_status = soup.select_one('span.user-text')
+login_status = login_status.get_text(strip=True)
+
+if login_status != 'ログイン中':
+    try:
+        driver.find_element_by_css_selector('span.user-icon').click()
+        wait = WebDriverWait(driver, timeout=10)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[class="login_pop cboxElement"]')))
+        driver.find_element_by_css_selector('a[class="login_pop cboxElement"]').click()
+        time.sleep(1)  # waitで待機すると、入力できないので、sleepを使用
+        input_email = driver.find_element_by_css_selector('input.text')
+        input_email.send_keys(Keys.CONTROL + 'a')
+        input_email.send_keys(Keys.DELETE)
+        input_email.send_keys(EMAIL)
+        input_password = driver.find_element_by_css_selector('input.password')
+        input_password.send_keys(Keys.CONTROL + 'a')
+        input_password.send_keys(Keys.DELETE)
+        input_password.send_keys(PASSWORD)
+        driver.find_element_by_css_selector('input[name="login"]').click()
+    except (NoSuchElementException, TimeoutException) as err:
+        logger.error(err)
+        logger.error('ログインのセレクタが見つかりません。セレクタが変更されている可能性があります。')
+        sys.exit()
+
+
+wait = WebDriverWait(driver, timeout=10)
+wait.until(EC.visibility_of_all_elements_located)
+soup = parse_html_selenium(driver)
+login_status = soup.select_one('span.user-text')
+login_status = login_status.get_text(strip=True)
+
+if login_status == 'ログイン中':
+    logger.debug('ログイン成功')
+else:
+    try:
+        raise CannotLogin
+    except CannotLogin:
+        logger.error('ログインに失敗しました。emailとpasswordを見直してください。')
+        sys.exit()
+
+hasLink = True
+review_links = soup.select('h3[class="title"] a')
+if not review_links:
+    hasLink = False
+    logger.debug('マンションレビューに該当物件がありませんでした。')
+
+if hasLink:
+    review_link = review_links[0].attrs['href']
+    get_with_wait(driver, review_link, isWait=True)
+
+# %%
+
+soup = parse_html_selenium(driver)
+estimated_price = soup.select_one('p.tanka span.js_automatic_assessment_sale_nominal_meter_tanka')
+estimated_price = estimated_price.get_text(strip=True)
+estimated_price = int(estimated_price.replace(',', ''))
+logger.debug(f'推定相場㎡単価：{estimated_price}万円/㎡')
+
+average_rent = soup.select('table.mansionOrderContentList tbody.average td')[3]
+average_rent = average_rent.get_text(strip=True)
+average_rent = average_rent.replace('＠', "").replace('@', "")
+average_rent = average_rent.replace('円', "").replace(',', "")
+average_rent = int(average_rent)
+logger.debug(f'賃料平均㎡単価：{average_rent}円')
+
+# %%
+
+import re
+
+content = '価格：23億1,650万円'
+pattern = '(\d+億)*(\d,)*(\d)+万円'
+
+content = '壁芯20㎡'
+pattern = '\d+.?\d*㎡'
+
+content = '＠31,636円'
+pattern = '(\d)*,?(\d)+円'
+
+# %%
+
+import numpy as np
+import pandas as pd
+from excel_settings import (
+    contain_index_header,
+    excel_save_setting,
+    set_font,
+    set_border,
+)
+
+filename = 'aaa.xlsx'
+
+dfHeader = pd.DataFrame({ 'A' : ['A'],
+                        'B' : 'B',
+                        'C' : 'C',
+                        'D' : 'D',
+                        'E' : 'E',
+                        'F' : 'F'})
+
+dfContent = pd.DataFrame({ 'A' : 1.,
+                        'B' : pd.Timestamp('20130102'),
+                        'C' : pd.Series(1,index=list(range(4)),dtype='float32'),
+                        'D' : np.array([3] * 4,dtype='int32'),
+                        'E' : pd.Categorical(["test","train","test","train"]),
+                        'F' : 'foo' })
+
+df = contain_index_header(dfHeader, dfContent)
+excel_save_setting(df, filename)
+set_font(filename)
+set_border(filename)
 
 # %%
