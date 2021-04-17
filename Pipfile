@@ -10,6 +10,8 @@ pandas = "*"
 requests = "*"
 eel = "*"
 lxml = "*"
+webdriver-manager = "*"
+python-dotenv = "*"
 
 [dev-packages]
 jupyter = "*"
