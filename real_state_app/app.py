@@ -4,7 +4,6 @@
 import sys
 import time
 import pandas as pd
-# from logging import getLogger,  FileHandler, StreamHandler, Formatter, DEBUG
 from pprint import pprint
 from collections import defaultdict
 from concurrent import futures
@@ -223,7 +222,7 @@ driver = set_driver(isHeadless=False, isManager=True)  # Seleniumドライバ設
 if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
     sys.exit()
 
-search(driver)
+# search(driver)
 
 # %%
 
@@ -240,95 +239,30 @@ search(driver)
 
 # %%
 
-# url = 'https://www.fudousan.or.jp/property/detail?p_no=000004123049'
-# # url = 'https://www.fudousan.or.jp/property/detail?p_no=000004134652'
-# get_with_wait(driver, url, isWait=True)  # 待機付きページ移動
-# soup = parse_html_selenium(driver)
+keyword = 'アプレシティ高円寺'
+review_url = f'https://www.mansion-review.jp/search/result/?mname={keyword}&direct_search_mname=1&bunjo_type=0&search=1#result'
+driver = set_driver(isHeadless=False, isManager=True) # Seleniumドライバ設定
+if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
+    sys.exit()
 
-# name = soup.select_one('h1.detail-h1')
-# try:
-#     if name is None:
-#         raise NoSelector
-# except NoSelector:
-#     sys.exit()  # セレクタが見つからなければ、終了する。
-# name = name.get_text(strip=True)
-
-# print(name)
+get_with_wait(driver, review_url, isWait=True)
 
 # %%
 
-# %%
-
-# keyword = 'アプレシティ高円寺'
-# review_url = f'https://www.mansion-review.jp/search/result/?mname={keyword}&direct_search_mname=1&bunjo_type=0&search=1#result'
-# driver = set_driver(isHeadless=False, isManager=True) # Seleniumドライバ設定
-# get_with_wait(driver, review_url, isWait=True)
-
-# %%
-
-# from selenium.webdriver.common.action_chains import ActionChains
-
-# wait = WebDriverWait(driver, 10)
-# wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.user-icon')))
-# driver.find_element_by_css_selector('span.user-icon').click()
-# wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[class="login_pop cboxElement"]')))
-# driver.find_element_by_css_selector('a[class="login_pop cboxElement"]').click()
-# time.sleep(1)
-# input_email = driver.find_element_by_css_selector('input.text')
-# input_email.send_keys(Keys.CONTROL + 'a')
-# input_email.send_keys(Keys.DELETE)
-# input_email.send_keys(EMAIL)
-# input_password = driver.find_element_by_css_selector('input.password')
-# input_password.send_keys(Keys.CONTROL + 'a')
-# input_password.send_keys(Keys.DELETE)
-# input_password.send_keys(PASSWORD)
-# # element = driver.find_element_by_css_selector('input[class="cta_button_input"]')
-# # element = driver.find_element_by_css_selector('input[class="cta_button_input search_submit"]')
-# element = driver.find_element_by_xpath('//*[@id="loginArea"]/form/table/tbody/tr[3]/td/div/input')
-# # element = driver.find_element_by_xpath('/html/body/div[12]/div[1]/div[2]/div[2]/div[1]/div/form/table/tbody/tr[3]/td/div')
-# loc = element.location
-# x, y = loc['x'], loc['y']
-# print(x, y)
-# actions = ActionChains(driver)
-# actions.move_by_offset(x, y)
-# actions.click()
-# actions.perform()
-
-
-# %%
-
-# print(EMAIL, PASSWORD)
-
-# %%
-
-# drivers = []
-
-# for i in range(3):
-#     driver = driver = set_driver()
-#     get_with_wait(driver, 'https://www.fudousan.or.jp', isWait=True)
-#     drivers.append(driver)
-
-
-# %%
-
-# driver = set_driver()
-# get_with_wait(driver, search_url, isWait=True)
-
-# %%
-
-
-# soup = parse_html_selenium(driver)
-# item_nodes = soup.select('a.prop-title-link')
-# items = []
-
-# for node in item_nodes:
-
-#     items.append(Item(top_url + node.attrs['href']))
-
-# for i, item in enumerate(items, 1):
-#     logger.debug(f'No.{i}')
-#     item.fetch_info(driver)
-#     logger.debug('\n')
-
+wait = WebDriverWait(driver, 10)
+wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.user-icon')))
+driver.find_element_by_css_selector('span.user-icon').click()
+wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[class="login_pop cboxElement"]')))
+driver.find_element_by_css_selector('a[class="login_pop cboxElement"]').click()
+time.sleep(1)
+input_email = driver.find_element_by_css_selector('input.text')
+input_email.send_keys(Keys.CONTROL + 'a')
+input_email.send_keys(Keys.DELETE)
+input_email.send_keys(EMAIL)
+input_password = driver.find_element_by_css_selector('input.password')
+input_password.send_keys(Keys.CONTROL + 'a')
+input_password.send_keys(Keys.DELETE)
+input_password.send_keys(PASSWORD)
+driver.find_element_by_name('login').click()
 
 # %%
