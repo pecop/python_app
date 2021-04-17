@@ -1,5 +1,4 @@
 import os
-import sys
 import signal
 import requests
 from bs4 import BeautifulSoup
@@ -9,20 +8,20 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import WebDriverException
+
+# Original import
+from logger import logger
 
 # Seleniumドライバ設定
 def set_driver(isHeadless=False, isManager=False):
 
     options = ChromeOptions()
 
-    try:
-        if os.name == 'nt': #Windows
-            driver_path = 'chromedriver.exe'
-        elif os.name == 'posix': #Mac
-            driver_path = 'chromedriver'
-    except Exception as err:
-        logger.error(err)
-        sys.exit()
+    if os.name == 'nt': #Windows
+        driver_path = 'chromedriver.exe'
+    elif os.name == 'posix': #Mac
+        driver_path = 'chromedriver'
 
     if isHeadless:
         options.add_argument('--headless')
@@ -32,10 +31,17 @@ def set_driver(isHeadless=False, isManager=False):
     # options.add_argument('--incognito') # シークレットモードの設定を付与
     options.add_argument('--user-data-dir=profile')
 
-    if isManager:
+    if isManager: # 自動取得
         driver = Chrome(ChromeDriverManager().install(), options=options)
-    else:
-        driver = Chrome(executable_path=os.getcwd() + '/' + driver_path, options=options)
+    else: # 手動取得
+
+        try:
+            driver = Chrome(executable_path=os.getcwd() + '/' + driver_path, options=options)
+        except (WebDriverException, FileNotFoundError) as err:
+            logger.error(err)
+            logger.error('Chromeと同じバージョンのChrome Driverをダウンロードしてください！')
+            return None
+
     driver.set_window_size('1200', '1000')
 
     return driver

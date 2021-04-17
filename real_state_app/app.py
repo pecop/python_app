@@ -1,9 +1,10 @@
 # %%
 
 # General import
+import sys
 import time
 import pandas as pd
-from logging import getLogger,  FileHandler, StreamHandler, Formatter, DEBUG
+# from logging import getLogger,  FileHandler, StreamHandler, Formatter, DEBUG
 from pprint import pprint
 from collections import defaultdict
 from concurrent import futures
@@ -17,21 +18,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import WebDriverException
 
 # Original import
+from logger import logger
 from scraping import set_driver, get_with_wait, parse_html, parse_html_selenium
 import settings
 
-# ロガー設定
-logger = getLogger(__name__)
-fomatterSetting = Formatter('[%(asctime)s] %(name)s %(threadName)s %(levelname)s: %(message)s', '%Y-%m-%d %H:%M:%S')
-# handler = FileHandler('logger.log') # テキスト出力する場合はコメントアウトを外す
-handler = StreamHandler() # テキスト出力するときはコメントアウトする
-handler.setLevel(DEBUG)
-logger.setLevel(DEBUG)
-handler.setFormatter(fomatterSetting)
-logger.addHandler(handler)
-logger.propagate = False
 
 # 不動産ジャパンURL
 top_url = 'https://www.fudousan.or.jp'
@@ -40,8 +33,20 @@ page_url_element = '&page='
 
 # マンションレビューログイン情報取得
 
-EMAIL = settings.EMAIL
-PASSWORD = settings.PASSWORD
+
+class NoEmailPassword(Exception):
+    pass
+
+
+try:
+    EMAIL = settings.EMAIL
+    PASSWORD = settings.PASSWORD
+    if EMAIL is None or PASSWORD is None:
+        raise NoEmailPassword
+except NoEmailPassword:
+    logger.error('.envファイルを作成し、マンションレビューのログイン情報(emailとpassword)を入力してください！')
+    sys.exit()
+
 
 # 物件クラス
 class Item():
@@ -51,7 +56,7 @@ class Item():
     @classmethod
     def countup(cls):
         cls.isName_count += 1
-    
+
     def __init__(self, url):
         self.url = url
         self.isName = False
@@ -69,11 +74,11 @@ class Item():
             'estimated_market_price': 0,
             'market_price_divide_price': 0,
             'estimated_yield': 0,
-            'unit_price_per_area': 0, 
+            'unit_price_per_area': 0,
             'estimated_market_price_per_area': 0,
             'average_rent_per_are': 0,
         }
-    
+
     # 不動産ジャパンから必要情報を抽出
     def fetch_info(self, driver):
 
@@ -95,7 +100,7 @@ class Item():
             name = soup.select_one('h1.detail-h1').get_text(strip=True)
             # スペースや改行などの不要な文字列を削除
             name = name.replace('?', '')
-            if name != '': # 物件名有無の判定
+            if name != '':  # 物件名有無の判定
                 self.item_info['name'] = name
                 self.isName = True
                 self.countup()
@@ -103,6 +108,7 @@ class Item():
             else:
                 logger.debug('物件名：無し')
         except Exception as err:
+            logger.error(err)
             logger.debug('物件名：無し')
 
     # 価格取得
@@ -111,13 +117,15 @@ class Item():
         try:
             price = soup.select_one('div.price').get_text(strip=True)
             # スペースや改行、日本語、カンマなどの不要な文字列を削除
-            price = price.replace(':', '').replace('：', '').replace(',', '').replace('万円', '').replace('価格', '').replace('億', '')
+            price = price.replace(':', '').replace('：', '').replace(',', '')
+            price = price.replace('万円', '').replace('価格', '').replace('億', '')
             if price != '':
                 self.item_info['price'] = int(price)
                 logger.debug(f'価格：{price}万円')
             else:
                 logger.debug('価格：無し')
         except Exception as err:
+            logger.error(err)
             logger.debug('価格：無し')
 
     # 表から以下の情報を取得
@@ -125,10 +133,9 @@ class Item():
     def fetch_table_info(self, soup):
 
         try:
-            # table_info_label = soup.select('div[class="detail-info"] td[class^="info-label"]')
             table_info_val = soup.select('div[class="detail-info"] td[class^="info-val"]')
-            place = self.item_info['place'] = (table_info_val[3].get_text(strip=True)).replace('周辺地図', '') # 不要文字列削除
-            area = self.item_info['area'] = float((table_info_val[9].get_text(strip=True)).replace('㎡', '').replace('壁芯', '')) # 不要文字列削除
+            place = self.item_info['place'] = (table_info_val[3].get_text(strip=True)).replace('周辺地図', '')  # 不要文字列削除
+            area = self.item_info['area'] = float((table_info_val[9].get_text(strip=True)).replace('㎡', '').replace('壁芯', '').replace('内法', ''))  # 不要文字列削除
             age = self.item_info['age'] = table_info_val[25].get_text(strip=True)
             situation = self.item_info['situation'] = table_info_val[38].get_text(strip=True)
             delivery = self.item_info['delivery'] = table_info_val[44].get_text(strip=True)
@@ -137,32 +144,40 @@ class Item():
             logger.debug(f'所在地：{place}, 専有面積：{area}, 築年月：{age}')
             logger.debug(f'現況：{situation}, 引渡し時期：{delivery}, 備考1：{remark}')
         except Exception as err:
+            logger.error(err)
             logger.debug('詳細情報：無し')
 
 
 def search(driver, page=1):
 
-    url = search_url + page_url_element + str(page) # ページ設定
-    get_with_wait(driver, url, isWait=True) # 待機付きページ移動
+    url = search_url + page_url_element + str(page)  # ページ設定
+    get_with_wait(driver, url, isWait=True)  # 待機付きページ移動
 
     soup = parse_html_selenium(driver)
-    item_nodes = soup.select('a.prop-title-link') # 各物件のURLが格納されているaタグを取得
+    item_nodes = soup.select('a.prop-title-link')  # 各物件のURLが格納されているaタグを取得
     items = []
 
     for node in item_nodes:
 
-        items.append(Item(top_url + node.attrs['href'])) # 各物件のURL取得
+        items.append(Item(top_url + node.attrs['href']))  # 各物件のURL取得
 
     for i, item in enumerate(items, 1):
         logger.debug(f'No.{i}')
-        item.fetch_info(driver) # 不動産ジャパンの必要情報取得
+        item.fetch_info(driver)  # 不動産ジャパンの必要情報取得
         logger.debug('')
 
     return driver, items
 
 # %%
 
-driver = set_driver(isHeadless=False, isManager=True) # Seleniumドライバ設定
+
+driver = set_driver(isHeadless=False, isManager=True)  # Seleniumドライバ設定
+
+if driver is None:
+    sys.exit()
+
+# %%
+
 items_list = []
 for i in range(1):
     driver, items = search(driver, i+1)
@@ -170,56 +185,56 @@ for i in range(1):
 
 # %%
 
-logger.debug(f'アイテム数：{Item.isName_count}/{len(items_list)}')
+# logger.debug(f'アイテム数：{Item.isName_count}/{len(items_list)}')
 
 # %%
 
 # %%
 
-for item in items_list:
-    pprint(item.item_info)
+# for item in items_list:
+#     pprint(item.item_info)
 
 # %%
 
-keyword = 'アプレシティ高円寺'
-review_url = f'https://www.mansion-review.jp/search/result/?mname={keyword}&direct_search_mname=1&bunjo_type=0&search=1#result'
-driver = set_driver(isHeadless=False, isManager=True) # Seleniumドライバ設定
-get_with_wait(driver, review_url, isWait=True)
+# keyword = 'アプレシティ高円寺'
+# review_url = f'https://www.mansion-review.jp/search/result/?mname={keyword}&direct_search_mname=1&bunjo_type=0&search=1#result'
+# driver = set_driver(isHeadless=False, isManager=True) # Seleniumドライバ設定
+# get_with_wait(driver, review_url, isWait=True)
 
 # %%
 
-from selenium.webdriver.common.action_chains import ActionChains
+# from selenium.webdriver.common.action_chains import ActionChains
 
-wait = WebDriverWait(driver, 10)
-wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.user-icon')))
-driver.find_element_by_css_selector('span.user-icon').click()
-wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[class="login_pop cboxElement"]')))
-driver.find_element_by_css_selector('a[class="login_pop cboxElement"]').click()
-time.sleep(1)
-input_email = driver.find_element_by_css_selector('input.text')
-input_email.send_keys(Keys.CONTROL + 'a')
-input_email.send_keys(Keys.DELETE)
-input_email.send_keys(EMAIL)
-input_password = driver.find_element_by_css_selector('input.password')
-input_password.send_keys(Keys.CONTROL + 'a')
-input_password.send_keys(Keys.DELETE)
-input_password.send_keys(PASSWORD)
-# element = driver.find_element_by_css_selector('input[class="cta_button_input"]')
-# element = driver.find_element_by_css_selector('input[class="cta_button_input search_submit"]')
-element = driver.find_element_by_xpath('//*[@id="loginArea"]/form/table/tbody/tr[3]/td/div/input')
-# element = driver.find_element_by_xpath('/html/body/div[12]/div[1]/div[2]/div[2]/div[1]/div/form/table/tbody/tr[3]/td/div')
-loc = element.location
-x, y = loc['x'], loc['y']
-print(x, y)
-actions = ActionChains(driver)
-actions.move_by_offset(x, y)
-actions.click()
-actions.perform()
+# wait = WebDriverWait(driver, 10)
+# wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'span.user-icon')))
+# driver.find_element_by_css_selector('span.user-icon').click()
+# wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a[class="login_pop cboxElement"]')))
+# driver.find_element_by_css_selector('a[class="login_pop cboxElement"]').click()
+# time.sleep(1)
+# input_email = driver.find_element_by_css_selector('input.text')
+# input_email.send_keys(Keys.CONTROL + 'a')
+# input_email.send_keys(Keys.DELETE)
+# input_email.send_keys(EMAIL)
+# input_password = driver.find_element_by_css_selector('input.password')
+# input_password.send_keys(Keys.CONTROL + 'a')
+# input_password.send_keys(Keys.DELETE)
+# input_password.send_keys(PASSWORD)
+# # element = driver.find_element_by_css_selector('input[class="cta_button_input"]')
+# # element = driver.find_element_by_css_selector('input[class="cta_button_input search_submit"]')
+# element = driver.find_element_by_xpath('//*[@id="loginArea"]/form/table/tbody/tr[3]/td/div/input')
+# # element = driver.find_element_by_xpath('/html/body/div[12]/div[1]/div[2]/div[2]/div[1]/div/form/table/tbody/tr[3]/td/div')
+# loc = element.location
+# x, y = loc['x'], loc['y']
+# print(x, y)
+# actions = ActionChains(driver)
+# actions.move_by_offset(x, y)
+# actions.click()
+# actions.perform()
 
 
 # %%
 
-print(EMAIL, PASSWORD)
+# print(EMAIL, PASSWORD)
 
 # %%
 
@@ -254,4 +269,3 @@ print(EMAIL, PASSWORD)
 
 
 # %%
-
