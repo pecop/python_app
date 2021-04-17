@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7cba45d40a8065fbe96bd87c0e0499d23c89a7406538c5746743206c064d3a88"
+            "sha256": "298773c05ac05a214558b41016b209de75ef0a65f520ec4a56aa551a516cd1f3"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -125,6 +125,12 @@
             ],
             "index": "pypi",
             "version": "==0.14.0"
+        },
+        "et-xmlfile": {
+            "hashes": [
+                "sha256:614d9722d572f6246302c4491846d2c393c199cfa4edc9af593437691683335b"
+            ],
+            "version": "==1.0.1"
         },
         "future": {
             "hashes": [
@@ -303,6 +309,14 @@
             "markers": "python_version >= '3.7'",
             "version": "==1.20.2"
         },
+        "openpyxl": {
+            "hashes": [
+                "sha256:46af4eaf201a89b610fcca177eed957635f88770a5462fb6aae4a2a52b0ff516",
+                "sha256:6456a3b472e1ef0facb1129f3c6ef00713cebf62e736cd7a75bcc3247432f251"
+            ],
+            "index": "pypi",
+            "version": "==3.0.7"
+        },
         "pandas": {
             "hashes": [
                 "sha256:167693a80abc8eb28051fbd184c1b7afd13ce2c727a5af47b048f1ea3afefff4",
@@ -406,11 +420,11 @@
         },
         "webdriver-manager": {
             "hashes": [
-                "sha256:22ae0ace4da117472302c21ead8ec05eb5c1312eeeba97547395d79f83afb241",
-                "sha256:6b54b18f75379f97f9e49f504a8e79010d47af1da8e7b5d7d7a103ca535b1e46"
+                "sha256:13a10d2aaf355103483c29b879d74c95629abdcc5fc40a0f0a92c7a4c7152e49",
+                "sha256:5e59c47d0df5c3449cbe8bd26c507ad8b70380cdba0d349a836448b4d5d0165e"
             ],
             "index": "pypi",
-            "version": "==3.3.0"
+            "version": "==3.4.0"
         },
         "whichcraft": {
             "hashes": [
@@ -904,10 +918,11 @@
         },
         "pyinstaller": {
             "hashes": [
-                "sha256:f5c0eeb2aa663cce9a5404292c0195011fa500a6501c873a466b2e8cad3c950c"
+                "sha256:2d28fd7c45ec24bd02892c7cf84ae67103bb6200863a64d4a17521e191649d76",
+                "sha256:5ecf8bbc230d7298a796e52bb745b95eee12878d141f1645612c99246ecd23f2"
             ],
             "index": "pypi",
-            "version": "==4.2"
+            "version": "==4.3"
         },
         "pyinstaller-hooks-contrib": {
             "hashes": [

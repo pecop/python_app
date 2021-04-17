@@ -12,6 +12,7 @@ eel = "*"
 lxml = "*"
 webdriver-manager = "*"
 python-dotenv = "*"
+openpyxl = "*"
 
 [dev-packages]
 jupyter = "*"
