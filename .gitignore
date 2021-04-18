@@ -2,6 +2,8 @@ old/
 study/
 spec/
 *.csv
+*.xls
+*.xlsx
 *.log
 *.spec
 .env

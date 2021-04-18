@@ -11,6 +11,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import (
     WebDriverException,
     InvalidArgumentException,
+    NoSuchElementException,
+    TimeoutException
 )
 
 # Original import
@@ -18,7 +20,7 @@ from logger import logger
 
 
 # Seleniumドライバ設定
-def set_driver(isHeadless=False, isManager=False):
+def set_driver(isHeadless=False, isManager=False, isSecret=False):
 
     options = ChromeOptions()
 
@@ -32,8 +34,9 @@ def set_driver(isHeadless=False, isManager=False):
 
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--ignore-ssl-errors')
-    # options.add_argument('--incognito')  # シークレットモードの設定を付与
     options.add_argument('--user-data-dir=profile')
+    if isSecret:
+        options.add_argument('--incognito')  # シークレットモードの設定を付与
 
     if isManager:  # 自動取得
         try:
@@ -62,7 +65,7 @@ def set_driver(isHeadless=False, isManager=False):
 
 
 # ドライバによるページ移動＋ページの全要素がDOM上に現れ, かつheight・widthが0以上になるまで待機
-def get_with_wait(driver, url, isWait=False, timeout=10):
+def get_with_wait(driver, url, isWait=False, timeout=30):
 
     driver.get(url)
 
