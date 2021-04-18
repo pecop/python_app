@@ -5,7 +5,7 @@ from openpyxl.styles import Font
 from openpyxl.styles.borders import Border, Side
 
 
-def excel_save_setting(df, filename, isIndex=False, isHeader=False):
+def excel_save(df, filename, isIndex=True, isHeader=True):
 
     try:
         df.to_excel(filename, index=isIndex, header=isHeader, encoding='utf-8-sig')

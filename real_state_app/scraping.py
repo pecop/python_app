@@ -65,7 +65,7 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False):
 
 
 # ドライバによるページ移動＋ページの全要素がDOM上に現れ, かつheight・widthが0以上になるまで待機
-def get_with_wait(driver, url, isWait=False, timeout=10):
+def get_with_wait(driver, url, isWait=False, timeout=30):
 
     driver.get(url)
 
