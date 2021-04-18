@@ -361,8 +361,8 @@ def search(driver, page=1):
         logger.debug('')
 
         # デバッグ用
-        if i > 3:
-            break
+        # if i > 3:
+        #     break
 
     return driver, items
 
