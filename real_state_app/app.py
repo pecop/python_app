@@ -29,7 +29,6 @@ from logger import logger
 from scraping import set_driver, get_with_wait, parse_html, parse_html_selenium
 import settings
 from spreadsheet_settings import (
-    contain_index_header,
     excel_save,
     set_font,
     set_border,
@@ -44,6 +43,11 @@ top_url = 'https://www.fudousan.or.jp'
 search_url = 'https://www.fudousan.or.jp/property/buy/13/area/list?m_adr%5B%5D=13101&m_adr%5B%5D=13102&m_adr%5B%5D=13103&m_adr%5B%5D=13104&m_adr%5B%5D=13105&m_adr%5B%5D=13106&m_adr%5B%5D=13107&m_adr%5B%5D=13108&m_adr%5B%5D=13109&m_adr%5B%5D=13110&m_adr%5B%5D=13111&m_adr%5B%5D=13112&m_adr%5B%5D=13113&m_adr%5B%5D=13114&m_adr%5B%5D=13115&m_adr%5B%5D=13116&m_adr%5B%5D=13117&m_adr%5B%5D=13118&m_adr%5B%5D=13119&m_adr%5B%5D=13120&m_adr%5B%5D=13121&m_adr%5B%5D=13122&m_adr%5B%5D=13123&ptm%5B%5D=0103&price_b_from=&price_b_to=&keyword=&eki_walk=&bus_walk=&exclusive_area_from=&exclusive_area_to=&exclusive_area_from=&exclusive_area_to=&built='
 page_url_element = '&page='
 
+# 検索物件数
+MAX_ITEM = 100
+
+# 不動産ジャパンの最大検索ページ(10ページ検索してもMAX_ITEMに達さない場合は終了)
+MAX_PAGE = 10
 
 # オリジナルエラー
 class NoEmailPassword(Exception):  # EmailとPasswordが設定されてない
@@ -356,15 +360,15 @@ def search(driver, page=1):
         items.append(Item(top_url + node.attrs['href']))  # 各物件のURL取得
 
     for i, item in enumerate(items, 1):
-        logger.debug(f'No.{i}')
+        logger.debug(f'No.{Item.isName_count+1}')
         item.fetch_info(driver)  # 不動産ジャパンの必要情報取得
         logger.debug('')
 
-        # デバッグ用
-        # if i > 3:
-        #     break
+        if Item.isName_count >= MAX_ITEM:
+            break
 
-    return driver, items
+    # return items
+    return list(filter(lambda item: item.isName, items))
 
 def save(items):
 
@@ -428,22 +432,26 @@ def save(items):
     }
 
     df = pd.DataFrame(item_dict)  # ディクショナリをDataFrameに変換
+    df.index += 1  # indexを1始まりに設定
     excel_save(df, filename)  # Excelファイル保存
     set_font(filename)  # フォントをメイリオに設定
     set_border(filename)  # ボーダー追加
 
 
 def main():
-    search_page = 1 # デバッグ用
+
     driver = set_driver(isHeadless=False, isManager=True)  # Seleniumドライバ設定
 
     if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
         sys.exit()
 
     items_list = []
-    for i in range(search_page):
-        driver, items = search(driver, i+1)
+    for i in range(MAX_PAGE):
+        items = search(driver, i+1)
         items_list += items
+
+        if Item.isName_count >= MAX_ITEM:
+            break
 
     logger.debug(f'アイテム数：{Item.isName_count}/{len(items_list)}')
 
