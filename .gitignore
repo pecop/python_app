@@ -12,3 +12,5 @@ __pycache__/
 profile/
 chromedriver.exe
 post_app
+Pipfile
+Pipfile.lock

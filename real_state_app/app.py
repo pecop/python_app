@@ -1,4 +1,3 @@
-# %%
 # General import
 import sys
 import time
@@ -131,7 +130,7 @@ class Item():
             if name is None:
                 raise NoSelector
         except NoSelector:
-            logger.error('物件名が見つかりません。セレクタが変更されている可能性があります。')
+            logger.error('物件名の情報の記載がありません。')
             sys.exit()  # セレクタが見つからなければ、終了する。
         name = name.get_text(strip=True)
 
@@ -156,7 +155,7 @@ class Item():
             if price is None:
                 raise NoSelector
         except NoSelector:
-            logger.error('価格が見つかりません。セレクタが変更されている可能性があります。')
+            logger.error('価格の情報の記載がありません。')
             sys.exit()  # セレクタが見つからなければ、終了する。
 
         price = price.get_text(strip=True)
@@ -183,7 +182,7 @@ class Item():
             if not table_info_val:
                 raise NoSelector
         except NoSelector:
-            logger.error('物件詳細情報の表が見つかりません。セレクタが変更されている可能性があります。')
+            logger.error('物件詳細情報表の情報の記載がありません。')
             sys.exit()
 
         location = table_info_val[3].get_text(strip=True)
@@ -202,20 +201,16 @@ class Item():
             logger.error('数値変換に失敗しました。不要文字が含まれている可能性があります。')
             sys.exit()
 
-        age = table_info_val[25]
-        age = age.get_text(strip=True)
+        age = table_info_val[25].get_text(strip=True)
         self.item_info['age'] = age
 
-        situation = table_info_val[38]
-        situation = situation.get_text(strip=True)
+        situation = table_info_val[38].get_text(strip=True)
         self.item_info['situation'] = situation
 
-        delivery = table_info_val[44]
-        delivery = delivery.get_text(strip=True)
+        delivery = table_info_val[44].get_text(strip=True)
         self.item_info['delivery'] = delivery
 
-        remark = table_info_val[49]
-        remark = remark.get_text(strip=True)
+        remark = table_info_val[49].get_text(strip=True)
         self.item_info['remark'] = remark
 
         logger.debug(f'所在地：{location}, 専有面積：{area}㎡, 築年月：{age}')
@@ -246,7 +241,7 @@ class Item():
                 sys.exit()
 
         else:
-            logger.error('推定相場㎡単価が見つかりません。セレクタが変更されている可能性があります。')
+            logger.error('推定相場㎡単価の情報の記載がありません。')
 
         average_list = soup.select('table.mansionOrderContentList tbody.average td')
 
@@ -266,7 +261,7 @@ class Item():
                 sys.exit()
 
         else:
-            logger.error('賃料平均㎡単価が見つかりません。セレクタが変更されている可能性があります。')
+            logger.error('賃料平均㎡単価の情報の記載がありません。')
 
 
     # マンションレビューログインチェック
@@ -294,7 +289,7 @@ class Item():
                 driver.find_element_by_css_selector('input[name="login"]').click()
             except (NoSuchElementException, TimeoutException) as err:
                 logger.error(err)
-                logger.error('ログインのセレクタが見つかりません。セレクタが変更されている可能性があります。')
+                logger.error('情報の記載がありません。')
                 sys.exit()
 
 
@@ -375,61 +370,53 @@ def save(items):
     # ファイル名設定
     filename = dt.now().strftime("%Y%m%d_%H%M") + '_東京都_マンション' + '.xlsx'
 
-    url1_list = []
-    url2_list = []
-    name_list = []
-    price_list = []
-    location_list = []
-    area_list = []
-    age_list = []
-    situation_list = []
-    delivery_list = []
-    remark_list = []
-    estimated_market_price_list = []
-    market_price_divide_price_list = []
-    estimated_yield_list = []
-    unit_price_per_area_list = []
-    estimated_market_price_per_area_list = []
-    average_rent_per_area_list = []
-
     # 物件をクラスから取り出し各要素をリストに変換
-    for item in items:
-        url1_list.append(item.item_info['url1'])
-        url2_list.append(item.item_info['url2'])
-        name_list.append(item.item_info['name'])
-        price_list.append(item.item_info['price'])
-        location_list.append(item.item_info['location'])
-        area_list.append(item.item_info['area'])
-        age_list.append(item.item_info['age'])
-        situation_list.append(item.item_info['situation'])
-        delivery_list.append(item.item_info['delivery'])
-        remark_list.append(item.item_info['remark'])
-        estimated_market_price_list.append(item.item_info['estimated_market_price'])
-        market_price_divide_price_list.append(item.item_info['market_price_divide_price'])
-        estimated_yield_list.append(item.item_info['estimated_yield'])
-        unit_price_per_area_list.append(item.item_info['unit_price_per_area'])
-        estimated_market_price_per_area_list.append(item.item_info['estimated_market_price_per_area'])
-        average_rent_per_area_list.append(item.item_info['average_rent_per_area'])
-
-    # 各要素ををディクショナリに格納
     item_dict = {
-        '価格': price_list,
-        '推定相場価格': estimated_market_price_list,
-        '相場価格/価格': market_price_divide_price_list,
-        '推定利回り': estimated_yield_list,
-        '建物名': name_list,
-        '所在地': location_list,
-        '専有面積': area_list,
-        '㎡単価': unit_price_per_area_list,
-        '推定相場㎡単価': estimated_market_price_per_area_list,
-        '賃料平均㎡単価': average_rent_per_area_list,
-        '築年月': age_list,
-        '現況': situation_list,
-        '引渡し時期': delivery_list,
-        '備考1': remark_list,
-        '物件詳細URL【不動産ジャパン】': url1_list,
-        '物件詳細URL【マンションレビュー】': url2_list,
+        'url1': [],
+        'url2': [],
+        'name': [],
+        'price': [],
+        'location': [],
+        'area': [],
+        'age': [],
+        'situation': [],
+        'delivery': [],
+        'remark': [],
+        'estimated_market_price': [],
+        'market_price_divide_price': [],
+        'estimated_yield': [],
+        'unit_price_per_area': [],
+        'estimated_market_price_per_area': [],
+        'average_rent_per_area': [],
     }
+
+    for item in items:
+        for k, v in item.item_info.items():
+                item_dict[k].append(v)
+
+    # ディクショナリのキーの変更
+    item_key_change = {
+        'price': '価格',
+        'estimated_market_price': '推定相場価格',
+        'market_price_divide_price': '相場価格/価格',
+        'estimated_yield': '推定利回り',
+        'name': '建物名',
+        'location': '所在地',
+        'area': '専有面積',
+        'unit_price_per_area': '㎡単価',
+        'estimated_market_price_per_area': '推定相場㎡単価',
+        'average_rent_per_area': '賃料平均㎡単価',
+        'age': '築年月',
+        'situation': '現況',
+        'delivery': '引渡し時期',
+        'remark': '備考1',
+        'url1': '物件詳細URL【不動産ジャパン】',
+        'url2': '物件詳細URL【マンションレビュー】',
+    }
+
+    for k, v in item_key_change.items():
+        item_dict[v] = item_dict.pop(k)
+
 
     df = pd.DataFrame(item_dict)  # ディクショナリをDataFrameに変換
     df.index += 1  # indexを1始まりに設定
@@ -440,29 +427,25 @@ def save(items):
 
 def main():
 
-    driver = set_driver(isHeadless=False, isManager=True)  # Seleniumドライバ設定
-
-    if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
-        sys.exit()
-
     items_list = []
     for i in range(MAX_PAGE):
+
+        driver = set_driver(isHeadless=False, isManager=True)  # Seleniumドライバ設定
+
+        if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
+            sys.exit()
+
         items = search(driver, i+1)
         items_list += items
+
+        driver.quit()  # ドライバ終了
 
         if Item.isName_count >= MAX_ITEM:
             break
 
-    logger.debug(f'アイテム数：{Item.isName_count}/{len(items_list)}')
-
-    # デバッグ用
-    # for item in items_list:
-    #     pprint(item.item_info)
-
+    logger.debug(f'アイテム数：{Item.isName_count}')
     save(items_list)
-    driver.quit()  # ドライバ終了
 
 if __name__ == "__main__":
     main()
 
-# %%

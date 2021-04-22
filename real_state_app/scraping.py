@@ -1,6 +1,7 @@
 import os
 import signal
 import requests
+import random
 from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
@@ -23,26 +24,14 @@ from logger import logger
 def set_driver(isHeadless=False, isManager=False, isSecret=False):
 
     options = ChromeOptions()
+
+    user_agent = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
+    ]
     
-#      # 起動オプションの設定
-#     options.add_argument('--headless')
-#     options.add_argument('--disable-gpu')
-#     options.add_argument('--no-sandbox')
-#     options.add_argument('log-level=3')
-#     options.add_argument('--ignore-ssl-errors')
-#     options.add_argument('--incognito')          # シークレットモードの設定を付与
-#     options.add_argument('--user-agent=Chrome/87.0.42.88')
-#     options.add_argument('--single-process')
-#     options.add_argument('--start-maximized')
-#     options.add_argument('--ignore-certificate-errors')
-#     options.add_argument('--allow-running-insecure-content')
-#     options.add_argument('--disable-web-security')
-#     options.add_argument('--disable-desktop-notifications')
-#     options.add_argument('--disable-application-cache')
-#     options.add_argument("--disable-extensions")
-#     options.add_argument('--lang=ja')
-
-
     if os.name == 'nt':  # Windows
         driver_path = 'chromedriver.exe'
     elif os.name == 'posix':  # Mac
@@ -51,11 +40,25 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False):
     if isHeadless:
         options.add_argument('--headless')
 
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--ignore-ssl-errors')
-    options.add_argument('--user-data-dir=profile')
     if isSecret:
         options.add_argument('--incognito')  # シークレットモードの設定を付与
+    else:
+        options.add_argument('--user-data-dir=profile')
+
+    options.add_argument('--disable-gpu')
+    options.add_argument('--no-sandbox')
+    options.add_argument('log-level=3')
+    options.add_argument('--ignore-ssl-errors')
+    options.add_argument(f'--user-agent={user_agent[random.randrange(0, len(user_agent), 1)]}')
+    # options.add_argument('--single-process')
+    options.add_argument('--start-maximized')
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--allow-running-insecure-content')
+    options.add_argument('--disable-web-security')
+    options.add_argument('--disable-desktop-notifications')
+    options.add_argument('--disable-application-cache')
+    options.add_argument("--disable-extensions")
+    options.add_argument('--lang=ja')
 
     if isManager:  # 自動取得
         try:
@@ -77,8 +80,6 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False):
             logger.error(err)
             logger.error('Chromeと同じバージョンのChrome Driverをダウンロードしてください。')
             return None
-
-    driver.set_window_size('1200', '1000')
 
     return driver
 
@@ -102,9 +103,9 @@ def keep_open_driver(driver):
 # サイトがJavaScriptによる表示をしており、画面表示していなければ、要素を取得できない場合、最下部までスクロール
 def scroll_bottom(driver, step):
 
-    height = driver.execute_script("return document.body.scrollHeight")
+    height = driver.execute_script('return document.body.scrollHeight')
     for x in range(1, height, step):
-        driver.execute_script("window.scrollTo(0, "+str(x)+");")
+        driver.execute_script(f'window.scrollTo(0, {str(x)});')
 
 
 # requestsによるhtmlのparse(ロボット判定されやすいので要注意)
