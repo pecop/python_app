@@ -43,7 +43,7 @@ search_url = 'https://www.fudousan.or.jp/property/buy/13/area/list?m_adr%5B%5D=1
 page_url_element = '&page='
 
 # 検索物件数
-MAX_ITEM = 100
+MAX_ITEM = 3
 
 # 不動産ジャパンの最大検索ページ(10ページ検索してもMAX_ITEMに達さない場合は終了)
 MAX_PAGE = 10
@@ -85,22 +85,22 @@ class Item():
         self.url = url
         self.isName = False
         self.item_info = {
-            'url1': url,
-            'url2': '',
-            'name': '',
-            'price': 0,
-            'location': '',
-            'area': '',
-            'age': '',
-            'situation': '',
-            'delivery': '',
-            'remark': '',
-            'estimated_market_price': 0,
-            'market_price_divide_price': 0,
-            'estimated_yield': 0,
-            'unit_price_per_area': 0,
-            'estimated_market_price_per_area': 0,
-            'average_rent_per_area': 0,
+            '価格': 0,
+            '推定相場価格': 0,
+            '相場価格/価格': 0,
+            '推定利回り': 0,
+            '建物名': '',
+            '所在地': '',
+            '専有面積': 0,
+            '㎡単価': 0,
+            '推定相場㎡単価': 0,
+            '賃料平均㎡単価': 0,
+            '築年月': '',
+            '現況': '',
+            '引渡し時期': '',
+            '備考1': '',
+            '物件詳細URL【不動産ジャパン】': url,
+            '物件詳細URL【マンションレビュー】': '',
         }
 
     # 必要情報を抽出
@@ -138,7 +138,7 @@ class Item():
         name = name.replace('?', '')
 
         if name != '':  # 物件名有無の判定
-            self.item_info['name'] = name
+            self.item_info['建物名'] = name
             self.isName = True
             self.countup()
             logger.debug(f'物件名：{name}')
@@ -164,7 +164,7 @@ class Item():
         price = price.replace('万円', '').replace('億', '').replace(',', '')
 
         try:
-            self.item_info['price'] = int(price)
+            self.item_info['価格'] = int(price)
             logger.debug(f'価格：{price}万円')
         except ValueError as err:
             logger.error(err)
@@ -187,7 +187,7 @@ class Item():
 
         location = table_info_val[3].get_text(strip=True)
         location = location.replace('周辺地図', '')  # 不要文字列削除
-        self.item_info['location'] = location
+        self.item_info['所在地'] = location
 
         area = table_info_val[9].get_text(strip=True)
         pattern = '\d+.?\d*㎡'
@@ -195,23 +195,23 @@ class Item():
         area = area.replace('㎡', '')  # 不要文字列削除
 
         try:
-            self.item_info['area'] = float(area)
+            self.item_info['専有面積'] = float(area)
         except ValueError as err:
             logger.error(err)
             logger.error('数値変換に失敗しました。不要文字が含まれている可能性があります。')
             sys.exit()
 
         age = table_info_val[25].get_text(strip=True)
-        self.item_info['age'] = age
+        self.item_info['築年月'] = age
 
         situation = table_info_val[38].get_text(strip=True)
-        self.item_info['situation'] = situation
+        self.item_info['現況'] = situation
 
         delivery = table_info_val[44].get_text(strip=True)
-        self.item_info['delivery'] = delivery
+        self.item_info['引渡し時期'] = delivery
 
         remark = table_info_val[49].get_text(strip=True)
-        self.item_info['remark'] = remark
+        self.item_info['備考1'] = remark
 
         logger.debug(f'所在地：{location}, 専有面積：{area}㎡, 築年月：{age}')
         logger.debug(f'現況：{situation}, 引渡し時期：{delivery}, 備考1：{remark}')
@@ -219,7 +219,7 @@ class Item():
     # マンションレビューに移動し情報を抽出(ログイン含む)
     def fetch_mansion_review_info(self, driver):
 
-        keyword = self.item_info['name']
+        keyword = self.item_info['建物名']
         review_url = f'https://www.mansion-review.jp/search/result/?mname={keyword}&direct_search_mname=1&bunjo_type=0&search=1#result'
         get_with_wait(driver, review_url, isWait=True)
         self.check_login(driver)
@@ -233,7 +233,7 @@ class Item():
             estimated_price = estimated_price.replace(',', '')
 
             try:
-                self.item_info['estimated_market_price_per_area'] = int(estimated_price)
+                self.item_info['推定相場㎡単価'] = int(estimated_price)
                 logger.debug(f'推定相場㎡単価：{estimated_price}万円/㎡')
             except ValueError as err:
                 logger.error(err)
@@ -253,7 +253,7 @@ class Item():
             average_rent = average_rent.replace('円', "").replace(',', "")
 
             try:
-                self.item_info['average_rent_per_area'] = int(average_rent)
+                self.item_info['賃料平均㎡単価'] = int(average_rent)
                 logger.debug(f'賃料平均㎡単価：{average_rent}円')
             except ValueError as err:
                 logger.error(err)
@@ -317,22 +317,22 @@ class Item():
 
         if hasLink:
             review_link = review_links[0].attrs['href']
-            self.item_info['url2'] = review_link
+            self.item_info['物件詳細URL【マンションレビュー】'] = review_link
             get_with_wait(driver, review_link, isWait=True)
     
     # 価格関連の計算
     def calc_price(self):
 
-        estimated_market_price_per_area = self.item_info['estimated_market_price_per_area']
-        average_rent_per_area = self.item_info['average_rent_per_area']
-        area = self.item_info['area']
-        price = self.item_info['price']
+        estimated_market_price_per_area = self.item_info['推定相場㎡単価']
+        average_rent_per_area = self.item_info['賃料平均㎡単価']
+        area = self.item_info['専有面積']
+        price = self.item_info['価格']
 
         estimated_market_price = estimated_market_price_per_area * area
-        self.item_info['estimated_market_price'] = estimated_market_price
-        self.item_info['market_price_divide_price'] = estimated_market_price / price * 100
-        self.item_info['estimated_yield'] = (average_rent_per_area * area) / (price * 10000) * 100
-        self.item_info['unit_price_per_area'] = price / area
+        self.item_info['推定相場価格'] = estimated_market_price
+        self.item_info['相場価格/価格'] = estimated_market_price / price * 100
+        self.item_info['推定利回り'] = (average_rent_per_area * area) / (price * 10000) * 100
+        self.item_info['㎡単価'] = price / area
 
 
 def search(driver, page=1):
@@ -370,53 +370,18 @@ def save(items):
     # ファイル名設定
     filename = dt.now().strftime("%Y%m%d_%H%M") + '_東京都_マンション' + '.xlsx'
 
-    # 物件をクラスから取り出し各要素をリストに変換
-    item_dict = {
-        'url1': [],
-        'url2': [],
-        'name': [],
-        'price': [],
-        'location': [],
-        'area': [],
-        'age': [],
-        'situation': [],
-        'delivery': [],
-        'remark': [],
-        'estimated_market_price': [],
-        'market_price_divide_price': [],
-        'estimated_yield': [],
-        'unit_price_per_area': [],
-        'estimated_market_price_per_area': [],
-        'average_rent_per_area': [],
-    }
+    keys = items[0].item_info.keys()  # 取得情報のキー取得
 
+    # 各取得情報の空リスト作成
+    values = []
+    for i in range(len(keys)):
+        values.append([])
+    item_dict = dict(zip(keys, values))
+
+    # Itemの情報を辞書内のリストに追加
     for item in items:
         for k, v in item.item_info.items():
                 item_dict[k].append(v)
-
-    # ディクショナリのキーの変更
-    item_key_change = {
-        'price': '価格',
-        'estimated_market_price': '推定相場価格',
-        'market_price_divide_price': '相場価格/価格',
-        'estimated_yield': '推定利回り',
-        'name': '建物名',
-        'location': '所在地',
-        'area': '専有面積',
-        'unit_price_per_area': '㎡単価',
-        'estimated_market_price_per_area': '推定相場㎡単価',
-        'average_rent_per_area': '賃料平均㎡単価',
-        'age': '築年月',
-        'situation': '現況',
-        'delivery': '引渡し時期',
-        'remark': '備考1',
-        'url1': '物件詳細URL【不動産ジャパン】',
-        'url2': '物件詳細URL【マンションレビュー】',
-    }
-
-    for k, v in item_key_change.items():
-        item_dict[v] = item_dict.pop(k)
-
 
     df = pd.DataFrame(item_dict)  # ディクショナリをDataFrameに変換
     df.index += 1  # indexを1始まりに設定
