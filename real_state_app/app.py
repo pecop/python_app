@@ -43,7 +43,7 @@ search_url = 'https://www.fudousan.or.jp/property/buy/13/area/list?m_adr%5B%5D=1
 page_url_element = '&page='
 
 # 検索物件数
-MAX_ITEM = 3
+MAX_ITEM = 100
 
 # 不動産ジャパンの最大検索ページ(10ページ検索してもMAX_ITEMに達さない場合は終了)
 MAX_PAGE = 10
