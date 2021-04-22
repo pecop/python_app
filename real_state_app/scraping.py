@@ -43,14 +43,15 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False):
     if isSecret:
         options.add_argument('--incognito')  # シークレットモードの設定を付与
     else:
-        options.add_argument('--user-data-dir=profile')
+        if not isHeadless:
+            options.add_argument('--user-data-dir=profile')
 
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
     options.add_argument('log-level=3')
     options.add_argument('--ignore-ssl-errors')
     options.add_argument(f'--user-agent={user_agent[random.randrange(0, len(user_agent), 1)]}')
-    # options.add_argument('--single-process')
+    options.add_argument('--single-process')
     options.add_argument('--start-maximized')
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--allow-running-insecure-content')

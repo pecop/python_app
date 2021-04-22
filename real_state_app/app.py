@@ -430,7 +430,7 @@ def main():
     items_list = []
     for i in range(MAX_PAGE):
 
-        driver = set_driver(isHeadless=False, isManager=True)  # Seleniumドライバ設定
+        driver = set_driver(isHeadless=True, isManager=True)  # Seleniumドライバ設定
 
         if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
             sys.exit()
