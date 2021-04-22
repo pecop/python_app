@@ -4,19 +4,15 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-selenium = "*"
-beautifulsoup4 = "*"
 pandas = "*"
-requests = "*"
-eel = "*"
-lxml = "*"
+beautifulsoup4 = "*"
+selenium = "*"
 webdriver-manager = "*"
 python-dotenv = "*"
 openpyxl = "*"
+lxml = "*"
 
 [dev-packages]
-jupyter = "*"
-pyinstaller = "*"
 
 [requires]
 python_version = "3.8"
