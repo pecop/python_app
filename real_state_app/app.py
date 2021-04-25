@@ -1,4 +1,4 @@
-# General import
+# Standard import
 import sys
 import time
 import re
@@ -6,7 +6,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime as dt
 
-# Scraping import
+
+# Third party import
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver import Chrome, ChromeOptions
@@ -24,14 +25,23 @@ from selenium.common.exceptions import (
 
 
 # Original import
-from logger import logger
-from scraping import set_driver, get_with_wait, parse_html, parse_html_selenium
-import settings
-from spreadsheet_settings import (
+from my_package.logger import logger
+from my_package.scraping import (
+    set_driver,
+    get_with_wait,
+    parse_html,
+    parse_html_selenium
+)
+from my_package.spreadsheet_settings import (
     excel_save,
     set_font,
     set_border,
 )
+
+
+# Local import
+import settings
+
 
 # Development import
 from pprint import pprint
