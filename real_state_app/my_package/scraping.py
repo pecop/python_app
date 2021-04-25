@@ -17,7 +17,8 @@ from selenium.common.exceptions import (
 )
 
 # Original import
-from logger import logger
+# from logger import logger
+from my_package.logger import logger
 
 
 # Seleniumドライバ設定
