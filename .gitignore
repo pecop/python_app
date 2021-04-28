@@ -1,16 +1,32 @@
-old/
-study/
-spec/
+# files
 *.csv
 *.xls
 *.xlsx
 *.log
 *.spec
-.env
+*.crx
+chromedriver.exe
+
+# directories
+old/
+study/
+spec/
 build/
 __pycache__/
+.vscode/
 profile/
-chromedriver.exe
-post_app
+node_modules/
+
+# evn files
+.env
+.env.local
+.env.*.local
+
+
+# pip
 Pipfile
 Pipfile.lock
+
+
+# others
+post_app
