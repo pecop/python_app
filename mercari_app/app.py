@@ -209,6 +209,8 @@ def main():
     set_font(filename)  # フォントをメイリオに設定
     set_border(filename)  # ボーダー追加
 
+    keep_open_driver(driver)
+
 if __name__ == "__main__":
     main()
 
