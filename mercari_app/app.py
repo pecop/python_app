@@ -157,7 +157,7 @@ def main():
 
     url = 'https://www.mercari.com/jp/search/?sort_order=&keyword=%E3%83%8A%E3%82%A4%E3%82%AD&category_root=2&category_child=&brand_name=&brand_id=&size_group=&price_min=3000&price_max=5000&item_condition_id%5B1%5D=1&status_trading_sold_out=1'
 
-    driver = set_driver(isHeadless=False, isManager=True, isExtension=True, profile_path=CHROME_PROFILE_PATH)  # Seleniumドライバ設定
+    driver = set_driver(isHeadless=False, isManager=False, isExtension=True, profile_path=CHROME_PROFILE_PATH)  # Seleniumドライバ設定
 
     if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
         sys.exit()
