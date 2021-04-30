@@ -59,6 +59,7 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
         # その場合は、プロファイル設定にて手動で機能を追加して、ヘッドレスモードかつ拡張機能Enableで使用する
         if (not isHeadless) or (not isExtension):
             options.add_argument('--user-data-dir=' + profile_path)
+            options.add_argument('--profile-directory=Profile 1')
 
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
