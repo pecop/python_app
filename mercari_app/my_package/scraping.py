@@ -1,4 +1,6 @@
 import os
+import sys
+from os.path import join, dirname
 import signal
 import requests
 import random
@@ -17,7 +19,6 @@ from selenium.common.exceptions import (
 )
 
 # Original import
-# from logger import logger
 from my_package.logger import logger
 
 
@@ -59,6 +60,7 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
         # その場合は、プロファイル設定にて手動で機能を追加して、ヘッドレスモードかつ拡張機能Enableで使用する
         if (not isHeadless) or (not isExtension):
             options.add_argument('--user-data-dir=' + profile_path)
+            # options.add_argument('--profile-directory=Profile 1')
 
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
@@ -87,7 +89,11 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
     else:  # 手動取得
 
         try:
-            path = os.getcwd() + '/' + driver_path
+            if getattr(sys, 'frozen', False):
+                directory_path = os.path.dirname(sys.executable)
+            else:
+                directory_path = os.getcwd()
+            path = join(directory_path, driver_path)
             driver = Chrome(executable_path=path, options=options)
         except InvalidArgumentException as err:
             logger.error(err)

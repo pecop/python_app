@@ -5,6 +5,10 @@ from openpyxl.styles import Font
 from openpyxl.styles.borders import Border, Side
 
 
+# Original import
+from my_package.logger import logger
+
+
 def excel_save(df, filename, isIndex=True, isHeader=True):
 
     try:
