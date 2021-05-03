@@ -1,4 +1,6 @@
 import os
+import sys
+from os.path import join, dirname
 import signal
 import requests
 import random
@@ -87,7 +89,11 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
     else:  # 手動取得
 
         try:
-            path = os.getcwd() + '/' + driver_path
+            if getattr(sys, 'frozen', False):
+                directory_path = os.path.dirname(sys.executable)
+            else:
+                directory_path = os.getcwd()
+            path = join(directory_path, driver_path)
             driver = Chrome(executable_path=path, options=options)
         except InvalidArgumentException as err:
             logger.error(err)

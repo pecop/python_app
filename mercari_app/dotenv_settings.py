@@ -4,9 +4,9 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 
 if getattr(sys, 'frozen', False):
-    directory_path = os.path.dirname(os.path.abspath(sys.executable))
+    directory_path = os.path.dirname(sys.executable)
 else:
-    directory_path = os.path.dirname(os.path.abspath(__file__))
+    directory_path = os.getcwd()
 
 dotenv_path = join(directory_path, '.env')
 load_dotenv(dotenv_path)

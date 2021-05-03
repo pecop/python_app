@@ -1,6 +1,8 @@
 # %%
 # Standard import
+import os
 import sys
+from os.path import join, dirname
 import time
 import re
 import pandas as pd
@@ -189,6 +191,11 @@ def main():
 
     # ファイル名設定
     filename = dt.now().strftime('%Y%m%d_%H%M') + '_mercari_demo' + '.xlsx'
+    if getattr(sys, 'frozen', False):
+        directory_path = os.path.dirname(sys.executable)
+    else:
+        directory_path = os.getcwd()
+    file_path = join(directory_path, filename)
 
     keys = items[0].item_info  # 取得情報のキー取得
 
@@ -205,9 +212,9 @@ def main():
 
     df = pd.DataFrame(item_dict)  # ディクショナリをDataFrameに変換
     df.index += 1  # indexを1始まりに設定
-    excel_save(df, filename)  # Excelファイル保存
-    set_font(filename)  # フォントをメイリオに設定
-    set_border(filename)  # ボーダー追加
+    excel_save(df, file_path)  # Excelファイル保存
+    set_font(file_path)  # フォントをメイリオに設定
+    set_border(file_path)  # ボーダー追加
 
     keep_open_driver(driver)
 
