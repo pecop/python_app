@@ -1,3 +1,6 @@
+import os
+import sys
+from os.path import join, dirname
 import eel
 from datetime import datetime as dt
 import pandas as pd
@@ -23,7 +26,6 @@ from my_package.spreadsheet_settings import (
     set_border,
 )
 
-
 app_name = 'web'
 end_point = 'index.html'
 size = (800, 750)
@@ -44,7 +46,7 @@ def search():
 
     url = 'https://www.mercari.com/jp/search/?sort_order=&keyword=%E3%83%8A%E3%82%A4%E3%82%AD&category_root=2&category_child=&brand_name=&brand_id=&size_group=&price_min=3000&price_max=5000&item_condition_id%5B1%5D=1&status_trading_sold_out=1'
 
-    driver = set_driver(isHeadless=False, isManager=True, isExtension=True, profile_path=CHROME_PROFILE_PATH)  # Seleniumドライバ設定
+    driver = set_driver(isHeadless=False, isManager=False, isExtension=True, profile_path=CHROME_PROFILE_PATH)  # Seleniumドライバ設定
 
     if driver is None:  # ドライバの設定が不正の場合はNoneが返ってくるので、システム終了
         sys.exit()
@@ -76,6 +78,16 @@ def search():
 
     # ファイル名設定
     filename = dt.now().strftime('%Y%m%d_%H%M') + '_mercari_demo' + '.xlsx'
+    if getattr(sys, 'frozen', False):
+        directory_path = os.path.dirname(sys.executable)
+        if '.app' in directory_path:
+            idx = directory_path.find('.app') 
+            directory_path = directory_path[:idx]
+            idx = directory_path.rfind('/')
+            directory_path = directory_path[:idx]
+    else:
+        directory_path = os.getcwd()
+    file_path = join(directory_path, filename)
 
     keys = items[0].item_info  # 取得情報のキー取得
 
