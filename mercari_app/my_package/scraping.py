@@ -24,9 +24,9 @@ from my_package.logger import logger
 
 # Seleniumドライバ設定
 def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=False, extension_path='', profile_path=''):
-    
+ 
     options = ChromeOptions()
-    logger.debug(options) #追加
+
 
     user_agent = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
@@ -86,6 +86,7 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
     options.add_argument('--disable-application-cache')
     options.add_argument('--lang=ja')
 
+
     if isManager:  # 自動取得
         try:
             driver = Chrome(ChromeDriverManager().install(), options=options)
@@ -109,7 +110,6 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
             else:
                 directory_path = os.getcwd()
             path = join(directory_path, driver_path)
-            logger.debug(options) #追加
             driver = Chrome(executable_path=path, options=options)
         except InvalidArgumentException as err:
             logger.error(err)
