@@ -24,8 +24,9 @@ from my_package.logger import logger
 
 # Seleniumドライバ設定
 def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=False, extension_path='', profile_path=''):
-
+    
     options = ChromeOptions()
+    logger.debug(options) #追加
 
     user_agent = [
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
@@ -33,7 +34,7 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
     ]
-    
+
     if os.name == 'nt':  # Windows
         driver_path = 'chromedriver.exe'
     elif os.name == 'posix':  # Mac
@@ -61,7 +62,16 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
         if (not isHeadless) or (not isExtension):
             # options.add_argument('--user-data-dir=' + profile_path)
             # options.add_argument('--profile-directory=Profile 1')
-            options.add_argument('--user-data-dir=' + os.path.join(os.getcwd(),"profile"))
+            if getattr(sys, 'frozen', False):
+                directory_path = os.path.dirname(sys.executable)
+                if '.app' in directory_path:
+                    idx = directory_path.find('.app')
+                    directory_path = directory_path[:idx]
+                    idx = directory_path.rfind('/')
+                    directory_path = directory_path[:idx]
+            else:
+                directory_path = os.getcwd()
+            options.add_argument('--user-data-dir=' + os.path.join(directory_path,"profile"))
 
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
@@ -75,7 +85,6 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
     options.add_argument('--disable-desktop-notifications')
     options.add_argument('--disable-application-cache')
     options.add_argument('--lang=ja')
-
 
     if isManager:  # 自動取得
         try:
@@ -100,6 +109,7 @@ def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=Fa
             else:
                 directory_path = os.getcwd()
             path = join(directory_path, driver_path)
+            logger.debug(options) #追加
             driver = Chrome(executable_path=path, options=options)
         except InvalidArgumentException as err:
             logger.error(err)
