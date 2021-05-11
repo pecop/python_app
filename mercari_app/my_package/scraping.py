@@ -24,7 +24,7 @@ from my_package.logger import logger
 
 # Seleniumドライバ設定
 def set_driver(isHeadless=False, isManager=False, isSecret=False, isExtension=False, extension_path='', profile_path=''):
- 
+
     options = ChromeOptions()
 
 
